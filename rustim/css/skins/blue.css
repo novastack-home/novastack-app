@@ -1,0 +1,114 @@
+body {
+  color: #222;
+  letter-spacing: 1px; }
+
+a {
+  color: #356dce; }
+
+p,
+.main_footer,
+.s_about li {
+  color: #888;
+  letter-spacing: 0.5px; }
+
+.color_element {
+  color: #356dce; }
+
+.color_bg {
+  background-color: #fff; }
+
+.color_border {
+  border-color: #356dce; }
+
+.bg_white {
+  background-color: #fff; }
+
+.bg_light {
+  background-color: #FAFAFA; }
+
+.bg_dark {
+  background-color: #222;
+  color: #fff; }
+  .bg_dark .s_descr::after {
+    background-color: #fff; }
+
+svg path {
+  fill: #888; }
+
+.toggle_mnu {
+  background-color: #000; }
+  .toggle_mnu .sw-topper, .toggle_mnu .sw-bottom, .toggle_mnu .sw-footer {
+    background: white; }
+
+.top_mnu {
+  background-color: rgba(0, 0, 0, 0.8); }
+  .top_mnu a {
+    color: #FAFAFA;
+    letter-spacing: 4px;
+    transition: all 0.5s; }
+  .top_mnu a:hover {
+    color: #356dce;
+    letter-spacing: 3px;
+    background-color: rgba(255, 255, 255, 0.05); }
+
+.top_text p {
+  color: #FAFAFA;
+  letter-spacing: 4px; }
+
+.s_descr {
+  letter-spacing: 4px; }
+  .s_descr::after {
+    background-color: #222; }
+
+section h3 {
+  color: #888;
+  letter-spacing: 3px; }
+
+.personal_header {
+  letter-spacing: 2px; }
+
+.s_about p:nth-child(even),
+.s_about .social_wrap li {
+  color: #356dce; }
+
+.resume_container h3 {
+  color: #222;
+  letter-spacing: 2px; }
+
+.resume_item .year {
+  background-color: #356dce;
+  color: #fff; }
+.resume_item .resume_description {
+  letter-spacing: 1px; }
+
+.s_portfolio li {
+  color: #888;
+  letter-spacing: 1px; }
+.s_portfolio .active {
+  color: #fff;
+  border-bottom: 1px solid #356dce; }
+
+.portfolio_item .port_item_cont button {
+  border-color: #356dce;
+  color: #356dce; }
+
+.main_footer a {
+  color: #356dce; }
+
+.contact_icon {
+  color: #356dce; }
+
+.text-danger {
+  color: #356dce; }
+
+form input:focus,
+form textarea:focus {
+  border: 1px solid #356dce; }
+form button {
+  background-color: #356dce;
+  letter-spacing: 2px; }
+form .form-group {
+  letter-spacing: 1px;
+  color: #text_color; }
+
+/*# sourceMappingURL=blue.css.map */
