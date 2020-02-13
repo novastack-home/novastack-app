@@ -99,6 +99,7 @@ function init(module) {
 				renderer.render(scene, camera);
 				canvasOutput.style.zIndex = "10";
 			} else if (cam_par[0] == 1){
+				console.log("3d Model");
 				camera = set_camera(camera, cam_par);
 				renderer.render(scene_model, camera)
 				canvasOutput.style.zIndex = "10";
