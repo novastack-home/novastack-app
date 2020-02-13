@@ -62,7 +62,7 @@ function init(module) {
 		let scene = new THREE.Scene();
 		initScene3JS(scene);
 		let scene_model = new THREE.Scene();
-		init3Dmodel(scene_model);
+		//init3Dmodel(scene_model);
 
 		let renderer = new THREE.WebGLRenderer({canvas: canvasOutput,
 												antilias: false,
@@ -100,7 +100,7 @@ function init(module) {
 				canvasOutput.style.zIndex = "10";
 			} else if (cam_par[0] == 1){
 				camera = set_camera(camera, cam_par);
-				renderer.render(scene_model, camera)
+				renderer.render(scene, camera)
 				canvasOutput.style.zIndex = "10";
 			} else {
 				renderer.clear();
@@ -210,7 +210,7 @@ function initScene3JS(scene){
     c4.position.set(0,-0.5,0);
 };
 
-
+/*
 function init3Dmodel(scene_model){
 		const configJSON = `{
         "models": [
@@ -239,7 +239,7 @@ function init3Dmodel(scene_model){
    // const model = models.get(0);
     //scene_model.add(model);
 };
-
+*/
 
 
 const getImageData = () => {
