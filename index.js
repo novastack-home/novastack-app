@@ -96,7 +96,7 @@ function init(module) {
 			// There was a problem: if zIndex = 10 from the first frame, the video is not visible
 			if (cam_par[0] == 0) {
 				camera = set_camera(camera, cam_par);
-				renderer.render(scene, camera);
+				renderer.render(scene_model, camera);
 				canvasOutput.style.zIndex = "10";
 			} else if (cam_par[0] == 1){
 				console.log("3d Model");
