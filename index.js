@@ -29,8 +29,6 @@ function init(module) {
         const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
         const onProcess = module.cwrap('onProcess', 'number', ['number', 'number', 'number']);
 		const finalizeMarkers = module.cwrap('finalizeMarkers', null);
-	    //void addMarker(void *marker, int width, int height);
-	    //void onProcess(void const *source, void *result, int width, int height);
 
 
         // Prepare space for initial frame and result image{cv}
@@ -38,22 +36,29 @@ function init(module) {
  		const imageWidth = canvasVideo.width;
  		const imageHeight = canvasVideo.height;
 
-		//const { data, width, height } = getImageData()
 		canvasContext.drawImage(video, 0, 0, canvasVideo.width, canvasVideo.height);
 		let imageData = canvasContext.getImageData(0, 0, canvasVideo.width, canvasVideo.height);
 		console.log(ImageData)
 
+		// Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
+		// After using, we need to delete allocated space, it cannot be done automaically.
        	const bufferSize = imageWidth * imageHeight * 4;
         let inputBuf = module._malloc(bufferSize);
    		let temp1 = new Uint8ClampedArray(module.HEAPU8.buffer, inputBuf, bufferSize);
 		temp1.set(imageData.data, 0);
 
 		onInit(inputBuf, imageWidth, imageHeight);
-		addMarkers(module, addMarker, finalizeMarkers);
-		//addMarkerFromImg(module, addMarker);
 		module._free(inputBuf);	
 		module._free(temp1);	
 		module._free(imageData);	
+
+		// Add marker-images that should be detected on the frame
+		// When all markers are added, we call 'finalize' function to prepare right id for markers.
+		addMarkers(module, addMarker, finalizeMarkers);
+
+
+		// Now we initialize 3JS components: 'scene', 'camera' and 'render'
+		// Scene consists 'light' and 'meshes'(objects with geometry and textures)
 
 		let canvasOutput = document.getElementById('canvasOutput');
 		const aspectRatio = canvasOutput.width / canvasOutput.height;
@@ -61,14 +66,24 @@ function init(module) {
 
 		let scene = new THREE.Scene();
 		initScene3JS(scene);
+
 		let scene_model = new THREE.Scene();
 		init3Dmodel(scene_model);
 
 		let renderer = new THREE.WebGLRenderer({canvas: canvasOutput,
-												antilias: false,
-											    alpha: true
+												antialias: true,
+											    alpha: true,
+											    powerPreference: "high-performance",
+											    precision: "highp",
+											    logarithmicDepthBuffer: "auto"
 											  });
+		renderer.physicallyCorrectLights = true;
+		renderer.shadowMap.enabled = true;
 
+		// Processing of the given frame in the loop:
+		// Take frame image -> Send to Emscripten code to detect or track markers on the frame (only 1 marker simultaniously)
+		// -> Find position of the camera -> send it with id to JS
+		// -> Add parameters to the camera -> Use given id to render right model
 		const cam_par = [];
 		const capture = function () {
 			var t0 = Date.now();
@@ -87,6 +102,7 @@ function init(module) {
 			console.log("onProcess time is:");
 			console.log(t2 - t1);
 
+			// We return array with C++ float type. So we need to get them in JS by using HEAP and memory
 			for (let v=0; v<10;v++){
 				cam_par.push(Module.HEAPF32[result/Float32Array.BYTES_PER_ELEMENT+v]);
 			}
@@ -94,11 +110,13 @@ function init(module) {
 
 			// Rendering depends on marker id. If no marker in scene, it clear all.
 			// There was a problem: if zIndex = 10 from the first frame, the video is not visible
-			if (cam_par[0] == 0) {
+			// It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
+			id_marker = cam_par[0];
+			if (id_marker == 0) {
 				camera = set_camera(camera, cam_par);
 				renderer.render(scene, camera);
 				canvasOutput.style.zIndex = "10";
-			} else if (cam_par[0] == 1){
+			} else if (id_marker == 1){
 				console.log("3d Model");
 				camera = set_camera(camera, cam_par);
 				renderer.render(scene_model, camera)
@@ -107,6 +125,9 @@ function init(module) {
 				renderer.clear();
 			}
 
+
+			// Delete object from array and clear C++ memory
+			// There is a problem OOM in firefox because of 'imageData'. It does not delete it each time.
 			for (let v=0; v<10;v++){
 				cam_par.pop();
 			} 
@@ -124,49 +145,6 @@ function init(module) {
 	};
 };
 
-
-function find_camera_parameters(onProcess, canvasContext, bufferSize, imageWidth, imageHeight){
-	var t0 = Date.now();
-
-	let imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight);
-
-	let inputBuf2 = Module._malloc(bufferSize);
-	let temp2 = new Uint8ClampedArray(Module.HEAPU8.buffer, inputBuf2, bufferSize);
-	temp2.set(imageData.data, 0);
-
-	var t1 = Date.now();
-	console.log("Buffer time is:");
-	console.log(t1 - t0);
-
-	result = onProcess(inputBuf2, imageWidth, imageHeight);
-
-	var t2 = Date.now();
-	console.log("onProcess time is:");
-	console.log(t2 - t1);
-
-	const cam_par = [];
-	for (let v=0; v<10;v++){
-		cam_par.push(Module.HEAPF32[result/Float32Array.BYTES_PER_ELEMENT+v]);
-	}
-
-
-	var t3 = Date.now();
-	console.log("ReBuffer time is:");
-	console.log(t3 - t2);
-
-	Module._free(imageData);
-	Module._free(inputBuf2);
-	Module._free(temp2);
-	Module._free(result);	
-
-	var t4 = Date.now();
-	console.log("Free time is:");
-	console.log(t4 - t3);
-
-	return cam_par;
-};
-
-
 function set_camera(camera, par){
     camera.position.set(par[1], par[2], par[3]);
     camera.lookAt(par[4], par[5], par[6]);
@@ -175,10 +153,7 @@ function set_camera(camera, par){
     return camera;
 };
 
-
-
 function initScene3JS(scene){
-	//renderer.setClearColor(0x00000);
 	// Light
 	const color = 0xffffff;
 	const intens = 1;
@@ -213,13 +188,23 @@ function initScene3JS(scene){
 
 
 function init3Dmodel(scene_model){
+		// Light
+		const color = 0xffffff;
+		const intens = 1;
+		const light = new THREE.DirectionalLight(color, intens);
+		const light2 = new THREE.AmbientLight(0xffffff);
+		light.position.set(-1, 2, 4);
+		scene_model.add(light);
+		scene_model.add(light2);
+
+		// Add model with parameters from JSON
 		const configJSON = `{
         "models": [
             {"id": 0, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1, -1.0, 0.0], "scale" : 0.4}]
         }`;
-           //{"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, 0.1, -1.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.15}
+           // {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, 0.1, -1.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.15}
         
-
+        // Load all model. Models should be 'glb' or 'gltf' - other types are not supported or supported badly.
         var objLoader = new THREE.GLTFLoader();
         const config= JSON.parse(configJSON);
         let models = new Map();
@@ -237,10 +222,7 @@ function init3Dmodel(scene_model){
             });
         }
 
-   // const model = models.get(0);
-    //scene_model.add(model);
 };
-
 
 
 const getImageData = () => {
@@ -250,16 +232,6 @@ const getImageData = () => {
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   console.log(ImageData)
   return imageData;
-};
-
-const drawOutputImage = (imageData, canvasId) => {
-  console.log('[drawOutputImage]');
-  const canvas = document.getElementById(canvasId);
-  canvas.width = imageData.width;
-  canvas.height = imageData.height;
-  console.log(ImageData);
-  const ctx = canvas.getContext('2d');
-  ctx.putImageData(imageData, 0, 0);
 };
 
 
