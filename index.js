@@ -10,6 +10,11 @@ var Module = {
   onRuntimeInitialized: () => init(Module),
 };
 
+// This is virtual canvas element that used for capture video frames
+let frameCaptureCanvas = document.createElement('canvas');
+frameCaptureCanvas.width = 640;
+frameCaptureCanvas.height = 480;
+let frameCaptureCanvasCtx2D = frameCaptureCanvas.getContext('2d');
 
 function init(module) {
   const constraints = {
@@ -27,8 +32,8 @@ function init(module) {
     video.onloadedmetadata = () => video.play();
 
     // It's used to capture frame and invisible
-    const canvasVideo = document.getElementById('canvasVideo');
-    const canvasContext = canvasVideo.getContext('2d');
+    const canvasVideo = frameCaptureCanvas;
+    const canvasContext = frameCaptureCanvasCtx2D;
 
     // Prepare Emscrypten functions
     const onInit = module.cwrap('onInit', null, ['number', 'number', 'number']);
@@ -239,8 +244,8 @@ function init3Dmodel(scene_model) {
 // eslint-disable-next-line no-unused-vars
 const getImageData = () => {
   console.log('[getImageData]');
-  const canvas = document.getElementById('canvasVideo');
-  const ctx = canvas.getContext('2d');
+  const canvas = frameCaptureCanvas;
+  const ctx = frameCaptureCanvasCtx2D;
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   console.log(ImageData);
   return imageData;
