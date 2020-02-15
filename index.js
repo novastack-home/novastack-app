@@ -91,6 +91,7 @@ function init(module) {
     });
     renderer.physicallyCorrectLights = true;
     renderer.shadowMap.enabled = true;
+    renderer.setClearColor(0x000000, 0);
 
     // Processing of the given frame in the loop:
     // Take frame image -> Send to Emscripten code to detect or track
@@ -123,18 +124,15 @@ function init(module) {
       console.log(cam_par);
 
       // Rendering depends on marker id. If no marker in scene, it clear all.
-      // There was a problem: if zIndex = 10 from the first frame, the video is not visible
       // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
       let id_marker = cam_par[0];
       if (id_marker === 0) {
         camera = set_camera(camera, cam_par);
         renderer.render(scene, camera);
-        canvasOutput.style.zIndex = '10';
       } else if (id_marker === 1) {
         console.log('3d Model');
         camera = set_camera(camera, cam_par);
         renderer.render(scene_model, camera);
-        canvasOutput.style.zIndex = '10';
       } else {
         renderer.clear();
       }
