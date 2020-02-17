@@ -9,12 +9,17 @@
        top: 0;
        left: 0;
        z-index: 10;
+       width: 100vw;
+       height: 100vh;
+       /* border: 2px solid blue; */
       }
       
       video{
        position: absolute;
        top: 0;
        left: 0;
+       width: 100vw;
+       height: 100vh;
       }
     </style>
     
@@ -23,12 +28,12 @@
   </head>
 
   <body id = "body">
-    <video id="video" width="640" height="480"></video>
+    <video id="video"></video>
 
     <img id="img1" src="images/M1.png" width="360" height="298" hidden>
     <img id="img2" src="images/M2.png" hidden>
 
-    <canvas id="canvasOutput" width="640" height="480"></canvas>
+    <canvas id="canvasOutput"></canvas>
 
     <script src="bundle.js"></script>
     <script src="js/demo.js"></script>
