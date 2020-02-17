@@ -84,14 +84,9 @@ function init(module) {
 
     let renderer = new THREE.WebGLRenderer({
       canvas: canvasOutput,
-      antialias: true,
+      antialias: false,
       alpha: true,
-      powerPreference: 'high-performance',
-      precision: 'highp',
-      logarithmicDepthBuffer: 'auto',
     });
-    renderer.physicallyCorrectLights = true;
-    renderer.shadowMap.enabled = true;
     renderer.setClearColor(0x000000, 0);
 
     // Processing of the given frame in the loop:
@@ -191,21 +186,21 @@ const addMarkerFromImg = (module, addMarker, markerData, width, height) => {
 
 
 const addMarkers = (module, addMarker, finalizeMarkers) => {
-  const canvasImg = document.getElementById('canvasImg');
+  const markersFolderPath = './images/';
+  const nmarkers = 2;
+
+  // Virtual canvas element for capture image data from img
+  const canvasImg = document.createElement('canvas');
   const contextImg = canvasImg.getContext('2d');
-  let img = document.getElementById('img');
 
-  for (let i = 1; i <= 2; i++) {
-    // const img = document.createElement('image');
-    imgName = ['img', i].join('');
-    img = document.getElementById(imgName);
-    console.log(imgName);
-
-    // img.src = markerName;
-    // img.src = 'images/M2.png';
-    console.log(img.height);
+  for (let i = 1; i <= nmarkers; i++) {
+    let imagePath = `${markersFolderPath}M${i}.png`;
+    let img = new Image();
+    img.src = imagePath;
+    // console.log(img.width, img.height);
     canvasImg.width = img.width;
     canvasImg.height = img.height;
+
     contextImg.drawImage(img, 0, 0);
     const markerData = contextImg.getImageData(0, 0, img.width, img.height);
 
