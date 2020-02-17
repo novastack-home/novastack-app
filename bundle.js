@@ -7,6 +7,9 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-var */
+const { Model3DScene } = require('./scenes/3DModel.js');
+const { Scene3JS } = require('./scenes/3JSModel.js');
+
 window.Module = {
   onRuntimeInitialized: () => init(Module),
 };
@@ -76,11 +79,8 @@ function init(module) {
     const aspectRatio = canvasOutput.width / canvasOutput.height;
     let camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
-    let scene = new THREE.Scene();
-    initScene3JS(scene);
-
-    let scene_model = new THREE.Scene();
-    init3Dmodel(scene_model);
+    let scene = new Scene3JS();
+    let scene_model = new Model3DScene();
 
     let renderer = new THREE.WebGLRenderer({
       canvas: canvasOutput,
@@ -166,80 +166,6 @@ function set_camera(camera, par) {
   return camera;
 }
 
-function initScene3JS(scene) {
-  // Light
-  const color = 0xffffff;
-  const intens = 1;
-  const light = new THREE.DirectionalLight(color, intens);
-  light.position.set(-1, 2, 4);
-  scene.add(light);
-
-  // Meshes
-  const geometry = new THREE.CylinderGeometry(0.03, 0.03, 1.02, 32);
-
-  // eslint-disable-next-line no-shadow
-  function makeInstance(geometry, color) {
-    const material = new THREE.MeshPhongMaterial({ color });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    return cube;
-  }
-  // 4 cylinders
-  const c1 = makeInstance(geometry, 0x2194ce);
-  c1.position.set(-0.5, 0, 0);
-
-  const c2 = makeInstance(geometry, 0x2194ce);
-  c2.position.set(0.5, 0, 0);
-
-  const c3 = makeInstance(geometry, 0x2194ce);
-  c3.rotation.z = Math.PI / 2;
-  c3.position.set(0, 0.5, 0);
-
-  const c4 = makeInstance(geometry, 0x2194ce);
-  c4.rotation.z = Math.PI / 2;
-  c4.position.set(0, -0.5, 0);
-}
-
-
-function init3Dmodel(scene_model) {
-  // Light
-  const color = 0xffffff;
-  const intens = 1;
-  const light = new THREE.DirectionalLight(color, intens);
-  const light2 = new THREE.AmbientLight(0xffffff);
-  light.position.set(-1, 2, 4);
-  scene_model.add(light);
-  scene_model.add(light2);
-
-  // Add model with parameters from JSON
-  const configJSON = `{
-        "models": [
-            {"id": 0, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1, -1.0, 0.0], "scale" : 0.4}]
-        }`;
-  // eslint-disable-next-line max-len
-  // {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, 0.1, -1.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.15}
-
-  // eslint-disable-next-line max-len
-  // Load all model. Models should be 'glb' or 'gltf' - other types are not supported or supported badly.
-  let objLoader = new THREE.GLTFLoader();
-  const config = JSON.parse(configJSON);
-  let models = new Map();
-
-  config.models.forEach((m) => {
-    objLoader.load(m.path, (g) => {
-      const model = g.scene;
-      model.scale.set(m.scale, m.scale, m.scale);
-      model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
-      model.position.set(m.position[0], m.position[1], m.position[2]);
-      scene_model.add(model);
-      models.set(m.id, model);
-    }, (e) => {
-      console.error('MODEL ERROR e=', e);
-    });
-  });
-}
-
-
 // eslint-disable-next-line no-unused-vars
 const getImageData = () => {
   console.log('[getImageData]');
@@ -288,5 +214,99 @@ const addMarkers = (module, addMarker, finalizeMarkers) => {
 
   finalizeMarkers();
 };
+
+},{"./scenes/3DModel.js":2,"./scenes/3JSModel.js":3}],2:[function(require,module,exports){
+class Model3DScene {
+  constructor() {
+    const sceneModel = new THREE.Scene();
+    init3Dmodel(sceneModel);
+    return sceneModel;
+  }
+}
+
+function init3Dmodel(scene_model) {
+  // Light
+  const color = 0xffffff;
+  const intens = 1;
+  const light = new THREE.DirectionalLight(color, intens);
+  const light2 = new THREE.AmbientLight(0xffffff);
+  light.position.set(-1, 2, 4);
+  scene_model.add(light);
+  scene_model.add(light2);
+
+  // Add model with parameters from JSON
+  const configJSON = `{
+        "models": [
+            {"id": 0, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1, -1.0, 0.0], "scale" : 0.4}]
+        }`;
+  // eslint-disable-next-line max-len
+  // {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, 0.1, -1.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.15}
+
+  // eslint-disable-next-line max-len
+  // Load all model. Models should be 'glb' or 'gltf' - other types are not supported or supported badly.
+  let objLoader = new THREE.GLTFLoader();
+  const config = JSON.parse(configJSON);
+  let models = new Map();
+
+  config.models.forEach((m) => {
+    objLoader.load(m.path, (g) => {
+      const model = g.scene;
+      model.scale.set(m.scale, m.scale, m.scale);
+      model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
+      model.position.set(m.position[0], m.position[1], m.position[2]);
+      scene_model.add(model);
+      models.set(m.id, model);
+    }, (e) => {
+      console.error('MODEL ERROR e=', e);
+    });
+  });
+}
+
+exports.Model3DScene = Model3DScene;
+
+},{}],3:[function(require,module,exports){
+class Scene3JS {
+  constructor() {
+    const scene = new THREE.Scene();
+    initScene3JS(scene);
+    return scene;
+  }
+}
+
+function initScene3JS(scene) {
+  // Light
+  const color = 0xffffff;
+  const intens = 1;
+  const light = new THREE.DirectionalLight(color, intens);
+  light.position.set(-1, 2, 4);
+  scene.add(light);
+
+  // Meshes
+  const geometry = new THREE.CylinderGeometry(0.03, 0.03, 1.02, 32);
+
+  // eslint-disable-next-line no-shadow
+  function makeInstance(geometry, color) {
+    const material = new THREE.MeshPhongMaterial({ color });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    return cube;
+  }
+  // 4 cylinders
+  const c1 = makeInstance(geometry, 0x2194ce);
+  c1.position.set(-0.5, 0, 0);
+
+  const c2 = makeInstance(geometry, 0x2194ce);
+  c2.position.set(0.5, 0, 0);
+
+  const c3 = makeInstance(geometry, 0x2194ce);
+  c3.rotation.z = Math.PI / 2;
+  c3.position.set(0, 0.5, 0);
+
+  const c4 = makeInstance(geometry, 0x2194ce);
+  c4.rotation.z = Math.PI / 2;
+  c4.position.set(0, -0.5, 0);
+}
+
+exports.Scene3JS = Scene3JS;
 
 },{}]},{},[1]);
