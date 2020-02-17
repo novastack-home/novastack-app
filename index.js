@@ -2,7 +2,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-undef */
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable no-console */
 /* eslint-disable prefer-const */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-var */
@@ -52,7 +51,7 @@ function init(module) {
 
     canvasContext.drawImage(video, 0, 0, canvasVideo.width, canvasVideo.height);
     let imageData = canvasContext.getImageData(0, 0, canvasVideo.width, canvasVideo.height);
-    console.log(ImageData);
+    // console.log(ImageData);
 
     // Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
     // After using, we need to delete allocated space, it cannot be done automaically.
@@ -96,7 +95,7 @@ function init(module) {
     const cam_par = [];
     // eslint-disable-next-line func-names
     const capture = function () {
-      var t0 = Date.now();
+      // var t0 = Date.now();
 
       canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
 
@@ -104,19 +103,19 @@ function init(module) {
       const inputBuf2 = module._malloc(bufferSize);
       module.HEAPU8.set(imageData, inputBuf2);
 
-      let t1 = Date.now();
+      // let t1 = Date.now();
 
       let result = onProcess(inputBuf2, imageWidth, imageHeight);
 
-      let t2 = Date.now();
-      console.log('onProcess time is:');
-      console.log(t2 - t1);
+      // let t2 = Date.now();
+      // console.log('onProcess time is:');
+      // console.log(t2 - t1);
 
       // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
       for (let v = 0; v < 10; v++) {
         cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
       }
-      console.log(cam_par);
+      // console.log(cam_par);
 
       // Rendering depends on marker id. If no marker in scene, it clear all.
       // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
@@ -125,7 +124,7 @@ function init(module) {
         camera = set_camera(camera, cam_par);
         renderer.render(scene, camera);
       } else if (id_marker === 1) {
-        console.log('3d Model');
+        // console.log('3d Model');
         camera = set_camera(camera, cam_par);
         renderer.render(scene_model, camera);
       } else {
@@ -141,9 +140,9 @@ function init(module) {
       module._free(inputBuf2);
       module._free(result);
 
-      let t4 = Date.now();
-      console.log('Total time is:');
-      console.log(t4 - t0);
+      // let t4 = Date.now();
+      // console.log('Total time is:');
+      // console.log(t4 - t0);
 
       requestAnimationFrame(capture);
     };
