@@ -83,14 +83,9 @@ function init(module) {
 
     let renderer = new THREE.WebGLRenderer({
       canvas: canvasOutput,
-      antialias: true,
+      antialias: false,
       alpha: true,
-      powerPreference: 'high-performance',
-      precision: 'highp',
-      logarithmicDepthBuffer: 'auto',
     });
-    renderer.physicallyCorrectLights = true;
-    renderer.shadowMap.enabled = true;
     renderer.setClearColor(0x000000, 0);
 
     // Processing of the given frame in the loop:
