@@ -21,10 +21,15 @@ let frameCaptureCanvasCtx2D = frameCaptureCanvas.getContext('2d');
 
 // We should get access to camera and load video metadata before calling init()
 function bootstrap(module) {
+  const isMobile = /mobile/i.test(navigator.userAgent);
   const constraints = {
     audio: false,
     video: true,
   };
+
+  if (isMobile) {
+    constraints.video = { facingMode: { exact: "environment" } };
+  }
 
   navigator.mediaDevices.getUserMedia(constraints)
     .then(success)
