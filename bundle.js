@@ -32,9 +32,15 @@ function bootstrap(module) {
     constraints.video = { facingMode: { exact: "environment" } };
   }
 
-  navigator.mediaDevices.getUserMedia(constraints)
-    .then(success)
-    .catch(console.error);
+  if (navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then(success)
+      .catch(console.error);
+  } else if (navigator.getUserMedia) {
+    navigator.getUserMedia(constraints, success, console.error);
+  } else {
+    console.error("Can't acces getUserMedia");
+  }
 
   function success(stream) {
     const video = document.getElementById('video');
