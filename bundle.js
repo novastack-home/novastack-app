@@ -22,7 +22,12 @@ let frameCaptureCanvasCtx2D = frameCaptureCanvas.getContext('2d');
 
 // We should get access to camera and load video metadata before calling init()
 function bootstrap(module) {
+  // Old getUserMedia based on callbacks and still may work in some browsers
+  getDeviceCamera = (navigator.getUserMedia || navigator.webKitGetUserMedia || navigator.moxGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+
+  // We should also detect tablets. Rewrite this
   const isMobile = /mobile/i.test(navigator.userAgent);
+
   const constraints = {
     audio: false,
     video: true,
@@ -36,8 +41,8 @@ function bootstrap(module) {
     navigator.mediaDevices.getUserMedia(constraints)
       .then(success)
       .catch(console.error);
-  } else if (navigator.getUserMedia) {
-    navigator.getUserMedia(constraints, success, console.error);
+  } else if (getDeviceCamera) {
+    getDeviceCamera(constraints, success, console.error);
   } else {
     console.error("Can't acces getUserMedia");
   }
