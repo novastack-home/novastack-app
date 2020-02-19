@@ -26,7 +26,7 @@ function bootstrap(module) {
   getDeviceCamera = (navigator.getUserMedia || navigator.webKitGetUserMedia || navigator.moxGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
 
   // We should also detect tablets. Rewrite this
-  const isMobile = /mobile/i.test(navigator.userAgent);
+  const isMobile = navigator.userAgent.match(/Android|BlackBerry|Tablet|Mobile|iPhone|iPad|iPod|Opera Mini|IEMobile/i);
 
   const constraints = {
     audio: false,
