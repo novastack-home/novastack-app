@@ -25,7 +25,7 @@ function bootstrap(module) {
   // Old getUserMedia based on callbacks and still may work in some browsers
   getDeviceCamera = (navigator.getUserMedia || navigator.webKitGetUserMedia || navigator.moxGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
 
-  // We should also detect tablets. Rewrite this
+  // Detect mobile device for request back camera
   const isMobile = navigator.userAgent.match(/Android|BlackBerry|Tablet|Mobile|iPhone|iPad|iPod|Opera Mini|IEMobile/i);
 
   const constraints = {
@@ -44,7 +44,7 @@ function bootstrap(module) {
   } else if (getDeviceCamera) {
     getDeviceCamera(constraints, success, console.error);
   } else {
-    console.error("Can't acces getUserMedia");
+    console.error("Can't access getUserMedia");
   }
 
   function success(stream) {
