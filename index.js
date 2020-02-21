@@ -110,11 +110,15 @@ function init(module) {
   let scene = new Scene3JS();
   let scene_model = new Model3DScene();
 
-  let renderer = new THREE.WebGLRenderer({
-    canvas: canvasOutput,
-    antialias: false,
-    alpha: true,
-  });
+  let renderer = new THREE.WebGLRenderer({canvas: canvasOutput,
+                                          antialias: true,
+                                            alpha: true,
+                                            powerPreference: "high-performance",
+                                            precision: "highp",
+                                            logarithmicDepthBuffer: "auto"
+                                          });
+  renderer.physicallyCorrectLights = true;
+  renderer.shadowMap.enabled = true;
   renderer.setClearColor(0x000000, 0);
 
   // Processing of the given frame in the loop:
