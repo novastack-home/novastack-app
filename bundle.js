@@ -38,16 +38,23 @@ function bootstrap(module) {
   }
 
   if (navigator.mediaDevices.getUserMedia) {
+    updateSaver('camera');
     navigator.mediaDevices.getUserMedia(constraints)
       .then(success)
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        updateSaver("error");
+      });
   } else if (getDeviceCamera) {
+    updateSaver('camera');
     getDeviceCamera(constraints, success, console.error);
   } else {
     console.error("Can't access getUserMedia");
+    updateSaver("media-error");
   }
 
   function success(stream) {
+    updateSaver();
     const video = document.getElementById('video');
     video.srcObject = stream;
     video.onloadedmetadata = () => {
@@ -242,6 +249,31 @@ const addMarkers = (module, addMarker, finalizeMarkers) => {
 
   finalizeMarkers();
 };
+
+// This function handles saver's state
+const updateSaver = (status) => {
+  const saverContent = document.querySelector('.saver-content');
+  let message, iconSrc;
+  if (status == "camera") {
+    message = "Please, allow access to your camera.";
+    iconSrc = "/icons/camera.svg";
+  } else if (status == "error") {
+    message = "Ooops! Something went wrong.";
+    iconSrc = "/icons/error.svg";
+  } else if (status == "media-error") {
+    iconSrc = "/icons/browser.svg";
+    message = "Cant't get access to your camera. Try to update your browser";
+  }
+
+  if (message && iconSrc) {
+    saverContent.innerHTML = `
+      <img src=${iconSrc} />
+      <p>${message}</p>
+    `;
+  } else {
+    document.querySelector('.saver').style.display = "none";
+  }
+}
 
 },{"./scenes/3DModel.js":2,"./scenes/3JSModel.js":3}],2:[function(require,module,exports){
 class Model3DScene {

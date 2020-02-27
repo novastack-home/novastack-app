@@ -3,7 +3,17 @@
   <head>
     <meta charset="utf-8">
     <title>Emscripten-Opencv-Video</title>
+    <link href="https://fonts.googleapis.com/css?family=Fira+Mono:400,700&display=swap" rel="stylesheet">
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        padding: 0;
+        margin: 0;
+      }
+
       #canvasOutput{
        position: absolute;
        top: 0;
@@ -13,7 +23,7 @@
        height: 100vh;
        /* border: 2px solid blue; */
       }
-      
+
       video{
        position: absolute;
        top: 0;
@@ -21,13 +31,65 @@
        width: 100vw;
        height: 100vh;
       }
+
+      .saver {
+        position: fixed;
+        width: 100vw;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+        font-family: 'Fira Mono', sans-serif;
+        font-size: 1.4em;
+        text-align: center;
+        padding: 1em;
+      }
+
+      .saver-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .saver img {
+        width: 100%;
+        max-width: 220px;
+      }
+
+      .saver-credits {
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        text-align: center;
+      }
+
+      a {
+        color: #10284c;
+      }
+
+      a:hover {
+        color: #0090bd;
+      }
     </style>
-    
+
     <script src="js/three.js" type="text/javascript"></script>
     <script src="https://threejs.org/examples/js/loaders/GLTFLoader.js"></script>
   </head>
 
-  <body id = "body">
+  <body id="body">
+    <div class="saver">
+      <div class="saver-content">
+        <img src="/icons/trolley.svg">
+        <p>Loading...</p>
+      </div>
+      <div class="saver-credits">
+        <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+      </div>
+    </div>
     <video id="video"></video>
 
     <img id="img1" src="images/M1.png" width="360" height="298" hidden>
