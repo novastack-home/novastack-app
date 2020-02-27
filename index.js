@@ -10,6 +10,10 @@ const { Scene3JS } = require('./scenes/3JSModel.js');
 
 // Size of video stream
 let VIDEO_WIDTH, VIDEO_HEIGHT;
+let VIDEO_ASPECT_RATIO;
+
+// Scale value for make corrections for aspect ratio
+let cameraZScale;
 
 window.Module = {
   onRuntimeInitialized: () => bootstrap(Module),
@@ -56,6 +60,9 @@ function bootstrap(module) {
     video.onloadedmetadata = () => {
       VIDEO_WIDTH = video.videoWidth;
       VIDEO_HEIGHT = video.videoHeight;
+      VIDEO_ASPECT_RATIO = VIDEO_WIDTH / VIDEO_HEIGHT;
+      cameraZScale = window.innerHeight / (window.innerWidth / VIDEO_ASPECT_RATIO);
+
       frameCaptureCanvas.width = VIDEO_WIDTH;
       frameCaptureCanvas.height = VIDEO_HEIGHT;
       video.play();
@@ -115,8 +122,8 @@ function init(module) {
   // Scene consists 'light' and 'meshes'(objects with geometry and textures)
 
   let canvasOutput = document.getElementById('canvasOutput');
-  canvasOutput.width = VIDEO_WIDTH;
-  canvasOutput.height = VIDEO_HEIGHT;
+  canvasOutput.width = window.innerWidth;
+  canvasOutput.height = window.innerHeight;
   const aspectRatio = canvasOutput.width / canvasOutput.height;
   let camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
@@ -199,7 +206,7 @@ function init(module) {
 }
 
 function set_camera(camera, par) {
-  camera.position.set(par[1], par[2], par[3]);
+  camera.position.set(par[1], par[2], par[3] * cameraZScale);
   camera.lookAt(par[4], par[5], par[6]);
   camera.up.set(par[7], par[8], par[9]);
 
