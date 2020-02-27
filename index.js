@@ -40,16 +40,13 @@ function bootstrap(module) {
     updateSaver('camera');
     navigator.mediaDevices.getUserMedia(constraints)
       .then(success)
-      .catch((err) => {
-        console.error(err);
-        updateSaver("error");
-      });
+      .catch(cameraError);
   } else if (getDeviceCamera) {
     updateSaver('camera');
-    getDeviceCamera(constraints, success, console.error);
+    getDeviceCamera(constraints, success, cameraError);
   } else {
     console.error("Can't access getUserMedia");
-    updateSaver("media-error");
+    updateSaver("mediaError");
   }
 
   function success(stream) {
@@ -64,6 +61,11 @@ function bootstrap(module) {
       video.play();
       init(module);
     };
+  }
+
+  function cameraError(err) {
+    console.error(err);
+    updateSaver("cameraError");
   }
 }
 
@@ -259,9 +261,12 @@ const updateSaver = (status) => {
   } else if (status == "error") {
     message = "Ooops! Something went wrong.";
     iconSrc = "/icons/error.svg";
-  } else if (status == "media-error") {
+  } else if (status == "mediaError") {
     iconSrc = "/icons/browser.svg";
     message = "Cant't get access to device camera. Try to update your browser.";
+  } else if (status == "cameraError") {
+    iconSrc = "/icons/error.svg";
+    message = "Cant't get access to device camera. Check camera connection.";
   }
 
   if (message && iconSrc) {
