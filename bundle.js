@@ -65,8 +65,12 @@ function bootstrap(module) {
   }
 
   function cameraError(err) {
-    console.error(err);
-    updateSaver("cameraError");
+    if (err.name = "NotAllowedError") {
+      updateSaver("notAllowed");
+    } else {
+      console.error(err);
+      updateSaver("cameraError");
+    }
   }
 }
 
@@ -268,6 +272,9 @@ const updateSaver = (status) => {
   } else if (status == "cameraError") {
     iconSrc = "/icons/error.svg";
     message = "Cant't get access to device camera. Check camera connection.";
+  } else if (status == "notAllowed") {
+    iconSrc = "/icons/error.svg";
+    message = "Cant't get access to device camera. Refresh your browser and allow access to continue.";
   }
 
   if (message && iconSrc) {
