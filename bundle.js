@@ -271,7 +271,7 @@ const updateSaver = (status) => {
     message = "Cant't get access to device camera. Try to update your browser.";
   } else if (status == "cameraError") {
     iconSrc = "/icons/error.svg";
-    message = "Cant't get access to device camera. Check camera connection.";
+    message = "Cant't get access to device camera. Check the camera connection.";
   } else if (status == "notAllowed") {
     iconSrc = "/icons/error.svg";
     message = "Cant't get access to device camera. Refresh your browser and allow access to continue.";
