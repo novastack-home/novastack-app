@@ -261,7 +261,7 @@ const updateSaver = (status) => {
     iconSrc = "/icons/error.svg";
   } else if (status == "media-error") {
     iconSrc = "/icons/browser.svg";
-    message = "Cant't get access to your camera. Try to update your browser";
+    message = "Cant't get access to device camera. Try to update your browser.";
   }
 
   if (message && iconSrc) {
