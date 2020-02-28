@@ -10,7 +10,6 @@ const { Scene3JS } = require('./scenes/3JSModel.js');
 
 // Size of video stream
 let VIDEO_WIDTH, VIDEO_HEIGHT;
-let VIDEO_ASPECT_RATIO;
 
 // Scale value for make corrections for aspect ratio
 let cameraZScale;
@@ -60,8 +59,7 @@ function bootstrap(module) {
     video.onloadedmetadata = () => {
       VIDEO_WIDTH = video.videoWidth;
       VIDEO_HEIGHT = video.videoHeight;
-      VIDEO_ASPECT_RATIO = VIDEO_WIDTH / VIDEO_HEIGHT;
-      cameraZScale = window.innerHeight / (window.innerWidth / VIDEO_ASPECT_RATIO);
+      calculateCameraZScale();
 
       frameCaptureCanvas.width = VIDEO_WIDTH;
       frameCaptureCanvas.height = VIDEO_HEIGHT;
@@ -290,5 +288,16 @@ const updateSaver = (status) => {
     `;
   } else {
     document.querySelector('.saver').style.display = "none";
+  }
+}
+
+function calculateCameraZScale() {
+  let videoAspectRatio = VIDEO_WIDTH / VIDEO_HEIGHT;
+  let videoPixelHeight = window.innerWidth / videoAspectRatio;
+  // let videoPixelWidth = window.innerHeight * videoAspectRatio;
+  if (videoPixelHeight < window.innerHeight) {
+    cameraZScale = window.innerHeight / videoPixelHeight;
+  } else {
+    cameraZScale = 1;
   }
 }
