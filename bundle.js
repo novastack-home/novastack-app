@@ -12,6 +12,8 @@ const { Scene3JS } = require('./scenes/3JSModel.js');
 // Size of video stream
 let VIDEO_WIDTH, VIDEO_HEIGHT;
 
+let canvasOutput = document.getElementById('canvasOutput');
+
 // Scale value for make corrections for aspect ratio
 let cameraZScale;
 
@@ -120,9 +122,8 @@ function init(module) {
   // Now we initialize 3JS components: 'scene', 'camera' and 'render'
   // Scene consists 'light' and 'meshes'(objects with geometry and textures)
 
-  let canvasOutput = document.getElementById('canvasOutput');
-  canvasOutput.width = window.innerWidth;
-  canvasOutput.height = window.innerHeight;
+  canvasOutput.width = canvasOutput.offsetWidth;
+  canvasOutput.height = canvasOutput.offsetHeight;
   const aspectRatio = canvasOutput.width / canvasOutput.height;
   let camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
@@ -294,10 +295,10 @@ const updateSaver = (status) => {
 
 function calculateCameraZScale() {
   let videoAspectRatio = VIDEO_WIDTH / VIDEO_HEIGHT;
-  let videoPixelHeight = window.innerWidth / videoAspectRatio;
+  let videoPixelHeight = canvasOutput.offsetWidth / videoAspectRatio;
   // let videoPixelWidth = window.innerHeight * videoAspectRatio;
-  if (videoPixelHeight < window.innerHeight) {
-    cameraZScale = window.innerHeight / videoPixelHeight;
+  if (videoPixelHeight < canvasOutput.offsetHeight) {
+    cameraZScale = canvasOutput.offsetHeight / videoPixelHeight;
   } else {
     cameraZScale = 1;
   }
