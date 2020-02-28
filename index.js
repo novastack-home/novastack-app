@@ -11,10 +11,14 @@ const { Scene3JS } = require('./scenes/3JSModel.js');
 // Size of video stream
 let VIDEO_WIDTH, VIDEO_HEIGHT;
 
+// Output canvas where threejs renders scene
 let canvasOutput = document.getElementById('canvasOutput');
 
 // Scale value for make corrections for aspect ratio
 let cameraZScale;
+
+let renderer;
+let camera;
 
 window.Module = {
   onRuntimeInitialized: () => bootstrap(Module),
@@ -23,6 +27,8 @@ window.Module = {
 // This is virtual canvas element that used for capture video frames
 let frameCaptureCanvas = document.createElement('canvas');
 let frameCaptureCanvasCtx2D = frameCaptureCanvas.getContext('2d');
+
+window.addEventListener('resize', handleWindowResize);
 
 // We should get access to camera and load video metadata before calling init()
 function bootstrap(module) {
@@ -121,24 +127,24 @@ function init(module) {
   // Now we initialize 3JS components: 'scene', 'camera' and 'render'
   // Scene consists 'light' and 'meshes'(objects with geometry and textures)
 
-  canvasOutput.width = canvasOutput.offsetWidth;
-  canvasOutput.height = canvasOutput.offsetHeight;
-  const aspectRatio = canvasOutput.width / canvasOutput.height;
-  let camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
+  const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
+  camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
   let scene = new Scene3JS();
   let scene_model = new Model3DScene();
 
-  let renderer = new THREE.WebGLRenderer({canvas: canvasOutput,
-                                          antialias: true,
-                                            alpha: true,
-                                            powerPreference: "high-performance",
-                                            precision: "highp",
-                                            logarithmicDepthBuffer: "auto"
-                                          });
+  renderer = new THREE.WebGLRenderer({
+    canvas: canvasOutput,
+    antialias: true,
+    alpha: true,
+    powerPreference: "high-performance",
+    precision: "highp",
+    logarithmicDepthBuffer: "auto"
+  });
   renderer.physicallyCorrectLights = true;
   renderer.shadowMap.enabled = true;
   renderer.setClearColor(0x000000, 0);
+  renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
 
   // Processing of the given frame in the loop:
   // Take frame image -> Send to Emscripten code to detect or track
@@ -301,4 +307,11 @@ function calculateCameraZScale() {
   } else {
     cameraZScale = 1;
   }
+}
+
+function handleWindowResize() {
+  renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
+  camera.aspect = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
+  camera.updateProjectionMatrix();
+  calculateCameraZScale();
 }
