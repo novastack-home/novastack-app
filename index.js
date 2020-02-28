@@ -77,12 +77,8 @@ function bootstrap(module) {
   }
 
   function cameraError(err) {
-    if (err.name = "NotAllowedError") {
-      updateSaver("notAllowed");
-    } else {
-      console.error(err);
-      updateSaver("cameraError");
-    }
+    console.error(err);
+    updateSaver("cameraError");
   }
 }
 
@@ -282,10 +278,7 @@ const updateSaver = (status) => {
     message = "Cant't get access to device camera. Try to update your browser.";
   } else if (status == "cameraError") {
     iconSrc = "/icons/error.svg";
-    message = "Cant't get access to device camera. Check the camera connection.";
-  } else if (status == "notAllowed") {
-    iconSrc = "/icons/error.svg";
-    message = "Cant't get access to device camera. Refresh your browser and allow access to continue.";
+    message = "Can't get access to your web-camera, please check its connection and reload this page.";
   }
 
   if (message && iconSrc) {
