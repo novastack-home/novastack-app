@@ -258,6 +258,9 @@ const updateSaver = (status) => {
   } else if (status == 'choose') {
     message = "Choose your device camera:";
     iconSrc = "/icons/camera.svg";
+  } else if (status == "loading") {
+    message = "Loading...";
+    iconSrc = "/icons/trolley.svg"
   }
 
   if (message && iconSrc) {
@@ -292,6 +295,7 @@ function requestMediaDevice() {
   return new Promise(function(resolve, reject) {
     updateSaver('camera');
     if (navigator.mediaDevices.getUserMedia) {
+      // To get deviceId's and labels we should request access first
       navigator.mediaDevices.getUserMedia({ audio: false, video: true })
         .then(success)
         .catch(reject);
@@ -311,6 +315,7 @@ function requestMediaDevice() {
           devices.forEach((device) => {
             let listItem = document.createElement('li');
             listItem.addEventListener('click', () => {
+              updateSaver("loading");
               let deviceId = device.deviceId;
               navigator.mediaDevices.getUserMedia({ audio: false, video: { deviceId } })
                 .then(resolve)
