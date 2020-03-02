@@ -32,33 +32,9 @@ window.addEventListener('resize', handleWindowResize);
 
 // We should get access to camera and load video metadata before calling init()
 function bootstrap(module) {
-  // Old getUserMedia based on callbacks and still may work in some browsers
-  getDeviceCamera = (navigator.getUserMedia || navigator.webKitGetUserMedia || navigator.moxGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
-
-  // Detect mobile device for request back camera
-  const isMobile = navigator.userAgent.match(/Android|BlackBerry|Tablet|Mobile|iPhone|iPad|iPod|Opera Mini|IEMobile/i);
-
-  const constraints = {
-    audio: false,
-    video: true,
-  };
-
-  if (isMobile) {
-    constraints.video = { facingMode: { exact: "environment" } };
-  }
-
-  if (navigator.mediaDevices.getUserMedia) {
-    updateSaver('camera');
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then(success)
-      .catch(cameraError);
-  } else if (getDeviceCamera) {
-    updateSaver('camera');
-    getDeviceCamera(constraints, success, cameraError);
-  } else {
-    console.error("Can't access getUserMedia");
-    updateSaver("mediaError");
-  }
+  requestMediaDevice()
+    .then(success)
+    .catch(cameraError);
 
   function success(stream) {
     updateSaver();
@@ -275,10 +251,13 @@ const updateSaver = (status) => {
     iconSrc = "/icons/error.svg";
   } else if (status == "mediaError") {
     iconSrc = "/icons/browser.svg";
-    message = "Cant't get access to device camera. Try to update your browser.";
+    message = "Cant't get access to device camera. Disable ad blocker or try to update your browser.";
   } else if (status == "cameraError") {
     iconSrc = "/icons/error.svg";
     message = "Can't get access to your web-camera, please check its connection and reload this page.";
+  } else if (status == 'choose') {
+    message = "Choose your device camera:";
+    iconSrc = "/icons/camera.svg";
   }
 
   if (message && iconSrc) {
@@ -307,4 +286,44 @@ function handleWindowResize() {
   camera.aspect = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
   camera.updateProjectionMatrix();
   calculateCameraZScale();
+}
+
+function requestMediaDevice() {
+  return new Promise(function(resolve, reject) {
+    updateSaver('camera');
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+        .then(success)
+        .catch(reject);
+    } else {
+      console.error(err);
+      updateSaver("mediaError");
+    }
+
+    function success(stream) {
+      updateSaver('choose');
+      navigator.mediaDevices.enumerateDevices()
+        .then((devices) => {
+          devices = devices.filter(d => d.kind === 'videoinput');
+
+          let deviceList = document.createElement('ul');
+          deviceList.classList.add('device-list');
+          devices.forEach((device) => {
+            let listItem = document.createElement('li');
+            listItem.addEventListener('click', () => {
+              let deviceId = device.deviceId;
+              navigator.mediaDevices.getUserMedia({ audio: false, video: { deviceId } })
+                .then(resolve)
+                .catch(reject)
+            });
+            listItem.innerHTML = device.label;
+            deviceList.appendChild(listItem);
+          });
+          document.querySelector('.saver-content').appendChild(deviceList);
+      })
+      .then(() => {
+        stream.getTracks().forEach(t => t.stop());
+      })
+    }
+  });
 }
