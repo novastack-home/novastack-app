@@ -246,22 +246,22 @@ const updateSaver = (status) => {
   let message, iconSrc;
   if (status == "camera") {
     message = "Please, allow access to your camera.";
-    iconSrc = "/icons/camera.svg";
+    iconSrc = "./icons/camera.svg";
   } else if (status == "error") {
     message = "Ooops! Something went wrong.";
-    iconSrc = "/icons/error.svg";
+    iconSrc = "./icons/error.svg";
   } else if (status == "mediaError") {
-    iconSrc = "/icons/browser.svg";
+    iconSrc = "./icons/browser.svg";
     message = "Cant't get access to device camera. Disable ad blocker or try to update your browser.";
   } else if (status == "cameraError") {
-    iconSrc = "/icons/error.svg";
+    iconSrc = "./icons/error.svg";
     message = "Can't get access to your web-camera, please check its connection and reload this page.";
   } else if (status == 'choose') {
     message = "Choose your device camera:";
-    iconSrc = "/icons/camera.svg";
+    iconSrc = "./icons/camera.svg";
   } else if (status == "loading") {
     message = "Loading...";
-    iconSrc = "/icons/trolley.svg"
+    iconSrc = "./icons/trolley.svg"
   }
 
   if (message && iconSrc) {
