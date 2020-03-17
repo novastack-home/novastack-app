@@ -16,7 +16,7 @@ let VIDEO_WIDTH, VIDEO_HEIGHT;
 let canvasOutput = document.getElementById('canvasOutput');
 
 // Scale value for make corrections for aspect ratio
-let cameraZScale;
+let cameraScale;
 
 let renderer;
 let camera;
@@ -44,7 +44,7 @@ function bootstrap(module) {
     video.onloadedmetadata = () => {
       VIDEO_WIDTH = video.videoWidth;
       VIDEO_HEIGHT = video.videoHeight;
-      calculateCameraZScale();
+      calculateCameraScale();
 
       frameCaptureCanvas.width = VIDEO_WIDTH;
       frameCaptureCanvas.height = VIDEO_HEIGHT;
@@ -184,7 +184,8 @@ function init(module) {
 }
 
 function set_camera(camera, par) {
-  camera.position.set(par[1], par[2], par[3] * cameraZScale);
+  let k = cameraScale;
+  camera.position.set(par[1]*k, par[2]*k, par[3]*k);
   camera.lookAt(par[4], par[5], par[6]);
   camera.up.set(par[7], par[8], par[9]);
 
@@ -274,22 +275,26 @@ const updateSaver = (status) => {
   }
 }
 
-function calculateCameraZScale() {
+function calculateCameraScale() {
   let videoAspectRatio = VIDEO_WIDTH / VIDEO_HEIGHT;
   let videoPixelHeight = canvasOutput.offsetWidth / videoAspectRatio;
   // let videoPixelWidth = window.innerHeight * videoAspectRatio;
   if (videoPixelHeight < canvasOutput.offsetHeight) {
-    cameraZScale = canvasOutput.offsetHeight / videoPixelHeight;
+    cameraScale = canvasOutput.offsetHeight / videoPixelHeight;
   } else {
-    cameraZScale = 1;
+    cameraScale = 1;
   }
 }
 
 function handleWindowResize() {
-  renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
-  camera.aspect = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
-  camera.updateProjectionMatrix();
-  calculateCameraZScale();
+  try {
+    renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
+    camera.aspect = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
+    camera.updateProjectionMatrix();
+    calculateCameraScale();
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 function requestMediaDevice() {
