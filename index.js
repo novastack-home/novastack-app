@@ -103,7 +103,7 @@ function init(module) {
   camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
   let scene = new Scene3JS();
-  let scene_model = new Model3DScene();
+  let scene_models = new Model3DScene();
 
   renderer = new THREE.WebGLRenderer({
     canvas: canvasOutput,
@@ -151,13 +151,14 @@ function init(module) {
     // Rendering depends on marker id. If no marker in scene, it clear all.
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
-    if (id_marker === 0) {
+    if (id_marker === 0 || id_marker === 3) {
       camera = set_camera(camera, cam_par);
       renderer.render(scene, camera);
-    } else if (id_marker === 1) {
+    } else if (id_marker > 0) {
+      scene3D = scene_models.get(id_marker);
       // console.log('3d Model');
       camera = set_camera(camera, cam_par);
-      renderer.render(scene_model, camera);
+      renderer.render(scene3D, camera);
     } else {
       renderer.clear();
     }
@@ -217,7 +218,7 @@ const addMarkerFromImg = (module, addMarker, markerData, width, height) => {
 
 const addMarkers = (module, addMarker, finalizeMarkers) => {
   const markersFolderPath = './images/';
-  const nmarkers = 2;
+  const nmarkers = 5;
 
   // Virtual canvas element for capture image data from img
   const canvasImg = document.createElement('canvas');

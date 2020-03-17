@@ -1,26 +1,21 @@
 class Model3DScene {
   constructor() {
-    const sceneModel = new THREE.Scene();
-    init3Dmodel(sceneModel);
-    return sceneModel;
+    let sceneModels = new Map();
+    init3Dmodel(sceneModels);
+    return sceneModels;
   }
 }
 
-function init3Dmodel(scene_model) {
-  // Light
-  const color = 0xffffff;
-  const intens = 1;
-  const light = new THREE.DirectionalLight(color, intens);
-  const light2 = new THREE.AmbientLight(0xffffff);
-  light.position.set(-1, 2, 4);
-  scene_model.add(light);
-  scene_model.add(light2);
+function init3Dmodel(sceneModels) {
+
 
   // Add model with parameters from JSON
   const configJSON = `{
         "models": [
-          {"id": 0, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1.57, -1.0, 0.0], "scale" : 0.4}]
-        }`;
+          {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06},
+          {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1.57, -1.0, 0.0], "scale" : 0.4},
+          {"id": 4, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
+          ]}`;
   // eslint-disable-next-line max-len
   // {"id": 2, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
   // {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06}
@@ -30,20 +25,40 @@ function init3Dmodel(scene_model) {
   // Load all model. Models should be 'glb' or 'gltf' - other types are not supported or supported badly.
   let objLoader = new THREE.GLTFLoader();
   const config = JSON.parse(configJSON);
-  let models = new Map();
-
   config.models.forEach((m) => {
-    objLoader.load(m.path, (g) => {
+    objLoader.load(m.path, (g) => {      
       const model = g.scene;
       model.scale.set(m.scale, m.scale, m.scale);
       model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
       model.position.set(m.position[0], m.position[1], m.position[2]);
-      scene_model.add(model);
-      models.set(m.id, model);
+
+      const sceneModel = new THREE.Scene();
+      sceneModel.add(model);
+      addLight(sceneModel);
+
+      sceneModels.set(m.id, sceneModel);
     }, (e) => {
       console.error('MODEL ERROR e=', e);
     });
   });
+}
+
+function addLight(scene){
+  // Light
+  const color = 0xffffff;
+  const intens = 1;
+  const light = new THREE.DirectionalLight(color, intens);
+  const light2 = new THREE.DirectionalLight(color, intens);
+  const light3 = new THREE.DirectionalLight(color, intens);
+  const light4 = new THREE.AmbientLight(0xffffff);
+  light.position.set(0., 1., 1.);
+  light2.position.set(0., 0., 1.);
+  light3.position.set(0., 1., 0.);
+
+  scene.add(light);
+  scene.add(light2);
+  scene.add(light3);
+  scene.add(light4);
 }
 
 exports.Model3DScene = Model3DScene;
