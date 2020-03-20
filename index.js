@@ -198,7 +198,7 @@ const getImageData = () => {
   const canvas = frameCaptureCanvas;
   const ctx = frameCaptureCanvasCtx2D;
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  console.log(ImageData);
+  //console.log(ImageData);
   return imageData;
 };
 
