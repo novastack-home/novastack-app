@@ -44,9 +44,7 @@ function init3Dmodel(sceneModels) {
       addLight(sceneModel);
 
       sceneModels.set(m.id, sceneModel);
-    }, (e) => {
-      console.error('MODEL ERROR e=', e);
-    });
+    }, onProgress, onError);
   });
 }
 
@@ -70,5 +68,14 @@ function addLight(scene){
   scene.add(light3);
   scene.add(light4);
 }
+
+function onProgress( xhr ) {
+	if ( xhr.lengthComputable ) {
+		var percentComplete = xhr.loaded / xhr.total * 100;
+		console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
+	}
+};
+
+function onError(err) { console.error(err); }
 
 exports.Model3DScene = Model3DScene;
