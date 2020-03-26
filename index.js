@@ -165,10 +165,14 @@ function init(module) {
     }
 
      if (id_marker > 0) {
-      scene3D = scenes.get(id_marker);
+      let scene3D = scenes.get(id_marker);
       // console.log('3d Model');
-      camera = set_camera(camera, cam_par);
-      renderer.render(scene3D, camera);
+      if (scene3D) {
+        camera = set_camera(camera, cam_par);
+        renderer.render(scene3D, camera);
+      } else {
+        console.warn('No scene available for marker id', id_marker);
+      }
     } else {
       renderer.clear();
     }
