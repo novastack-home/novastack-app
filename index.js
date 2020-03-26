@@ -102,8 +102,13 @@ function init(module) {
   const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
   camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
-  let scene = new Scene3JS();
-  let scene_models = new Model3DScene();
+  // let scene = new Scene3JS();
+  // let scene_models = new Model3DScene();
+
+  let animationMixers = new Map();
+  let scenes = new Model3DScene(animationMixers);
+
+  var clock = new THREE.Clock();
 
   renderer = new THREE.WebGLRenderer({
     canvas: canvasOutput,
@@ -152,11 +157,15 @@ function init(module) {
     // Rendering depends on marker id. If no marker in scene, it clear all.
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
-    if (id_marker === 0 || id_marker === 3 || id_marker === 5) {
-      camera = set_camera(camera, cam_par);
-      renderer.render(scene, camera);
-    } else if (id_marker > 0) {
-      scene3D = scene_models.get(id_marker);
+
+    let mixer = animationMixers.get(id_marker);
+    if (mixer) {
+      var delta = clock.getDelta();
+      mixer.update( delta );
+    }
+
+     if (id_marker > 0) {
+      scene3D = scenes.get(id_marker);
       // console.log('3d Model');
       camera = set_camera(camera, cam_par);
       renderer.render(scene3D, camera);

@@ -1,21 +1,24 @@
 class Model3DScene {
-  constructor() {
+  constructor(animationMixers) {
     let sceneModels = new Map();
-    init3Dmodel(sceneModels);
+    init3Dmodel(sceneModels, animationMixers);
     return sceneModels;
   }
 }
 
-function init3Dmodel(sceneModels) {
+function init3Dmodel(sceneModels, animationMixers) {
 
 
   // Add model with parameters from JSON
   const configJSON = `{
-        "models": [
-          {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06},
-          {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
-          {"id": 4, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
-          ]}`;
+  "models": [
+    {"id": 1, "path" : "models/whale/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
+    {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
+    {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
+    {"id": 4, "path" : "models/rainer/scene.gltf", "position" : [0.0, -0.4, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.0015},
+    {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.005},
+    {"id": 6, "path" : "models/walkeri/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
+  ]}`;
   // eslint-disable-next-line max-len
   // {"id": 2, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
   // {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06}
@@ -32,12 +35,9 @@ function init3Dmodel(sceneModels) {
       model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
       model.position.set(m.position[0], m.position[1], m.position[2]);
 
-      // model.traverse( function( child ) {
-      //   if ( child.isMesh ) {
-      //       child.castShadow = true;
-      //       child.receiveShadow = true;
-      //   }
-      // });
+      let mixer = new THREE.AnimationMixer(g.scene);
+      g.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
+      animationMixers.set(m.id, mixer);
 
       const sceneModel = new THREE.Scene();
       sceneModel.add(model);
