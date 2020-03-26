@@ -11,7 +11,7 @@ function bundle() {
 }
 
 function watchFiles() {
-  watch('./index.js', { ignoreInitial: false }, bundle);
+  watch(['./index.js', './scenes/*.js'], { ignoreInitial: false }, bundle);
 }
 
 exports.default = watchFiles;
