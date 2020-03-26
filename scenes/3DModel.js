@@ -44,6 +44,7 @@ function init3Dmodel(sceneModels, animationMixers) {
       addLight(sceneModel);
 
       sceneModels.set(m.id, sceneModel);
+      console.log('Created scene for model', m.path);
     }, onProgress, onError);
   });
 }
