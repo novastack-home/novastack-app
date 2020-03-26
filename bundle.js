@@ -116,6 +116,7 @@ function init(module) {
   });
   renderer.physicallyCorrectLights = true;
   renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
 
@@ -199,7 +200,7 @@ const getImageData = () => {
   const canvas = frameCaptureCanvas;
   const ctx = frameCaptureCanvasCtx2D;
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  console.log(ImageData);
+  //console.log(ImageData);
   return imageData;
 };
 
@@ -356,7 +357,7 @@ function init3Dmodel(sceneModels) {
   const configJSON = `{
         "models": [
           {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06},
-          {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1.57, -1.0, 0.0], "scale" : 0.4},
+          {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
           {"id": 4, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
           ]}`;
   // eslint-disable-next-line max-len
@@ -369,11 +370,18 @@ function init3Dmodel(sceneModels) {
   let objLoader = new THREE.GLTFLoader();
   const config = JSON.parse(configJSON);
   config.models.forEach((m) => {
-    objLoader.load(m.path, (g) => {      
+    objLoader.load(m.path, (g) => {
       const model = g.scene;
       model.scale.set(m.scale, m.scale, m.scale);
       model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
       model.position.set(m.position[0], m.position[1], m.position[2]);
+
+      model.traverse( function( child ) {
+        if ( child.isMesh ) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+      });
 
       const sceneModel = new THREE.Scene();
       sceneModel.add(model);
@@ -394,6 +402,9 @@ function addLight(scene){
   const light2 = new THREE.DirectionalLight(color, intens);
   const light3 = new THREE.DirectionalLight(color, intens);
   const light4 = new THREE.AmbientLight(0xffffff);
+  light.castShadow = true;
+  light2.castShadow = true;
+  light3.castShadow = true;
   light.position.set(0., 1., 1.);
   light2.position.set(0., 0., 1.);
   light3.position.set(0., 1., 0.);
