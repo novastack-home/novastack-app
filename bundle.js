@@ -165,7 +165,7 @@ function init(module) {
       mixer.update( delta );
     }
 
-     if (id_marker > 0) {
+     if (id_marker >= 0) {
       let scene3D = scenes.get(id_marker);
       // console.log('3d Model');
       if (scene3D) {
