@@ -151,7 +151,7 @@ function init(module) {
     // Rendering depends on marker id. If no marker in scene, it clear all.
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
-    if (id_marker === 0 || id_marker === 3) {
+    if (id_marker === 0 || id_marker === 3 || id_marker === 5) {
       camera = set_camera(camera, cam_par);
       renderer.render(scene, camera);
     } else if (id_marker > 0) {
@@ -217,8 +217,8 @@ const addMarkerFromImg = (module, addMarker, markerData, width, height) => {
 
 
 const addMarkers = (module, addMarker, finalizeMarkers) => {
-  const markersFolderPath = './images/';
-  const nmarkers = 5;
+  const markersFolderPath = './images/ar_markers/';
+  const nmarkers = 6;
 
   // Virtual canvas element for capture image data from img
   const canvasImg = document.createElement('canvas');
