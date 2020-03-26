@@ -376,12 +376,12 @@ function init3Dmodel(sceneModels) {
       model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
       model.position.set(m.position[0], m.position[1], m.position[2]);
 
-      model.traverse( function( child ) {
-        if ( child.isMesh ) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-        }
-      });
+      // model.traverse( function( child ) {
+      //   if ( child.isMesh ) {
+      //       child.castShadow = true;
+      //       child.receiveShadow = true;
+      //   }
+      // });
 
       const sceneModel = new THREE.Scene();
       sceneModel.add(model);
