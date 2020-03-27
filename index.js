@@ -20,6 +20,10 @@ let cameraScale;
 let renderer;
 let camera;
 
+// Store scenes and animation mixers for them
+let modelScenes = new Map();
+let animationMixers = new Map();
+
 window.Module = {
   onRuntimeInitialized: () => bootstrap(Module),
 };
@@ -35,6 +39,11 @@ function bootstrap(module) {
   requestMediaDevice()
     .then(success)
     .catch(cameraError);
+
+  // Load models and create a scenes for them
+  if (navigator.mediaDevices.getUserMedia) {
+    Model3DScene.init(sceneModels, animationMixers);
+  }
 
   function success(stream) {
     updateSaver();
@@ -105,9 +114,6 @@ function init(module) {
   // let scene = new Scene3JS();
   // let scene_models = new Model3DScene();
 
-  let animationMixers = new Map();
-  let scenes = new Model3DScene(animationMixers);
-
   var clock = new THREE.Clock();
 
   renderer = new THREE.WebGLRenderer({
@@ -165,7 +171,7 @@ function init(module) {
     }
 
      if (id_marker >= 0) {
-      let scene3D = scenes.get(id_marker);
+      let scene3D = modelScenes.get(id_marker);
       // console.log('3d Model');
       if (scene3D) {
         camera = set_camera(camera, cam_par);

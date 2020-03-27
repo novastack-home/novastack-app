@@ -21,6 +21,10 @@ let cameraScale;
 let renderer;
 let camera;
 
+// Store scenes and animation mixers for them
+let modelScenes = new Map();
+let animationMixers = new Map();
+
 window.Module = {
   onRuntimeInitialized: () => bootstrap(Module),
 };
@@ -36,6 +40,11 @@ function bootstrap(module) {
   requestMediaDevice()
     .then(success)
     .catch(cameraError);
+
+  // Load models and create a scenes for them
+  if (navigator.mediaDevices.getUserMedia) {
+    Model3DScene.init(sceneModels, animationMixers);
+  }
 
   function success(stream) {
     updateSaver();
@@ -106,9 +115,6 @@ function init(module) {
   // let scene = new Scene3JS();
   // let scene_models = new Model3DScene();
 
-  let animationMixers = new Map();
-  let scenes = new Model3DScene(animationMixers);
-
   var clock = new THREE.Clock();
 
   renderer = new THREE.WebGLRenderer({
@@ -166,7 +172,7 @@ function init(module) {
     }
 
      if (id_marker >= 0) {
-      let scene3D = scenes.get(id_marker);
+      let scene3D = modelScenes.get(id_marker);
       // console.log('3d Model');
       if (scene3D) {
         camera = set_camera(camera, cam_par);
@@ -355,32 +361,41 @@ function requestMediaDevice() {
 }
 
 },{"./scenes/3DModel.js":2,"./scenes/3JSModel.js":3}],2:[function(require,module,exports){
+// Add model with parameters from JSON
+const configJSON = `{
+"models": [
+  {"id": 1, "path" : "models/whale/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
+  {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
+  {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
+  {"id": 4, "path" : "models/rainer/scene.gltf", "position" : [0.0, -0.4, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.0015},
+  {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.005},
+  {"id": 0, "path" : "models/walkeri/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
+]}`;
+// eslint-disable-next-line max-len
+// {"id": 2, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
+// {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06}
+// {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, 0.1, -1.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.15}
+// {"id": 0, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1.57, -1.0, 0.0], "scale" : 0.4}]
+
 class Model3DScene {
-  constructor(animationMixers) {
-    let sceneModels = new Map();
-    init3Dmodel(sceneModels, animationMixers);
-    return sceneModels;
+  static async init(scenes, mixers) {
+    const config = JSON.parse(configJSON);
+    for (const model of config.models) {
+      try {
+        const { scene, mixer } = await loadModelScene(model);
+        scenes.set(model.id, scene);
+        mixers.set(model.id, mixer);
+      } catch (err) {
+        console.error(err);
+      }
+    }
   }
 }
 
+/*
 function init3Dmodel(sceneModels, animationMixers) {
 
 
-  // Add model with parameters from JSON
-  const configJSON = `{
-  "models": [
-    {"id": 1, "path" : "models/whale/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
-    {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
-    {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
-    {"id": 4, "path" : "models/rainer/scene.gltf", "position" : [0.0, -0.4, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.0015},
-    {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.005},
-    {"id": 0, "path" : "models/walkeri/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
-  ]}`;
-  // eslint-disable-next-line max-len
-  // {"id": 2, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
-  // {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06}
-  // {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, 0.1, -1.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.15}
-  // {"id": 0, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1.57, -1.0, 0.0], "scale" : 0.4}]
   // eslint-disable-next-line max-len
   // Load all model. Models should be 'glb' or 'gltf' - other types are not supported or supported badly.
   let objLoader = new THREE.GLTFLoader();
@@ -403,6 +418,31 @@ function init3Dmodel(sceneModels, animationMixers) {
       sceneModels.set(m.id, sceneModel);
       console.log('Created scene for model', m.path);
     }, onProgress, onError);
+  });
+}
+*/
+
+function loadModelScene(m) {
+  return new Promise((resolve, reject) => {
+    let objLoader = new THREE.GLTFLoader();
+    objLoader.load(m.path, (g) => {
+      const model = g.scene;
+      model.scale.set(m.scale, m.scale, m.scale);
+      model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
+      model.position.set(m.position[0], m.position[1], m.position[2]);
+
+      let mixer = new THREE.AnimationMixer(g.scene);
+      g.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
+      animationMixers.set(m.id, mixer);
+
+      const sceneModel = new THREE.Scene();
+      sceneModel.add(model);
+      addLight(sceneModel);
+
+      console.log('Created scene for model', m.path);
+
+      resolve({ scene: sceneModel, mixer });
+    }, onProgress, reject);
   });
 }
 
@@ -433,8 +473,6 @@ function onProgress( xhr ) {
 		console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
 	}
 };
-
-function onError(err) { console.error(err); }
 
 exports.Model3DScene = Model3DScene;
 
