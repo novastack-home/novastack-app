@@ -164,6 +164,9 @@ function init(module) {
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
 
+    if (id_marker === 3) id_marker = 5;
+    if (id_marker === 4) id_marker = 1;
+
     let mixer = animationMixers.get(id_marker);
     if (mixer) {
       var delta = clock.getDelta();

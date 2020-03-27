@@ -165,6 +165,9 @@ function init(module) {
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
 
+    if (id_marker === 3) id_marker = 5;
+    if (id_marker === 4) id_marker = 1;
+
     let mixer = animationMixers.get(id_marker);
     if (mixer) {
       var delta = clock.getDelta();
@@ -366,11 +369,14 @@ const configJSON = `{
 "models": [
   {"id": 1, "path" : "models/whale/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
   {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
-  {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
-  {"id": 4, "path" : "models/rainer/scene.gltf", "position" : [0.0, -0.4, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.0015},
   {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.005},
   {"id": 0, "path" : "models/walkeri/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
 ]}`;
+// Drone
+// {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
+// AK
+// {"id": 4, "path" : "models/rainer/scene.gltf", "position" : [0.0, -0.4, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.0015},
+
 // eslint-disable-next-line max-len
 // {"id": 2, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
 // {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06}
