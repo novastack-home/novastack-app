@@ -369,8 +369,8 @@ const configJSON = `{
 "models": [
   {"id": 1, "path" : "models/whale/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
   {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
-  {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.005},
-  {"id": 0, "path" : "models/walkeri/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
+  {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.004},
+  {"id": 0, "path" : "models/walkeri/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
 ]}`;
 // Drone
 // {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
