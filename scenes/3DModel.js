@@ -19,7 +19,7 @@ class Model3DScene {
     const config = JSON.parse(configJSON);
     for (const model of config.models) {
       try {
-        const { scene, mixer } = await loadModelScene(model);
+        const { scene, mixer } = await loadModelScene(model, mixers);
         scenes.set(model.id, scene);
         mixers.set(model.id, mixer);
       } catch (err) {
@@ -59,7 +59,8 @@ function init3Dmodel(sceneModels, animationMixers) {
 }
 */
 
-function loadModelScene(m) {
+function loadModelScene(m, animationMixers) {
+  console.warn('Loading model', m.path);
   return new Promise((resolve, reject) => {
     let objLoader = new THREE.GLTFLoader();
     objLoader.load(m.path, (g) => {
@@ -76,7 +77,7 @@ function loadModelScene(m) {
       sceneModel.add(model);
       addLight(sceneModel);
 
-      console.log('Created scene for model', m.path);
+      console.warn('Created scene for model', m.path);
 
       resolve({ scene: sceneModel, mixer });
     }, onProgress, reject);

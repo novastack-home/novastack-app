@@ -42,7 +42,7 @@ function bootstrap(module) {
 
   // Load models and create a scenes for them
   if (navigator.mediaDevices.getUserMedia) {
-    Model3DScene.init(sceneModels, animationMixers);
+    Model3DScene.init(modelScenes, animationMixers);
   }
 
   function success(stream) {
