@@ -42,9 +42,11 @@ function bootstrap(module) {
     .catch(cameraError);
 
   // Load models and create a scenes for them
+  /*
   if (navigator.mediaDevices.getUserMedia) {
     Model3DScene.init(modelScenes, animationMixers);
   }
+  */
 
   function success(stream) {
     updateSaver();
@@ -112,7 +114,7 @@ function init(module) {
   const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
   camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
-  // let scene = new Scene3JS();
+  let scene = new Scene3JS();
   // let scene_models = new Model3DScene();
 
   var clock = new THREE.Clock();
@@ -168,13 +170,18 @@ function init(module) {
     if (id_marker === 3) id_marker = 5;
     if (id_marker === 4) id_marker = 1;
 
+    /*
     let mixer = animationMixers.get(id_marker);
     if (mixer) {
       var delta = clock.getDelta();
       mixer.update( delta );
     }
+    */
 
      if (id_marker >= 0) {
+     	camera = set_camera(camera, cam_par);
+       renderer.render(scene, camera);
+     /*
       let scene3D = modelScenes.get(id_marker);
       // console.log('3d Model');
       if (scene3D) {
@@ -183,6 +190,7 @@ function init(module) {
       } else {
         console.warn('No scene available for marker id', id_marker);
       }
+      */
     } else {
       renderer.clear();
     }
@@ -242,7 +250,7 @@ const addMarkerFromImg = (module, addMarker, markerData, width, height) => {
 
 const addMarkers = (module, addMarker, finalizeMarkers) => {
   const markersFolderPath = './images/ar_markers/';
-  const nmarkers = 6;
+  const nmarkers = 3;
 
   // Virtual canvas element for capture image data from img
   const canvasImg = document.createElement('canvas');
