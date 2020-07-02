@@ -42,11 +42,11 @@ function bootstrap(module) {
     .catch(cameraError);
 
   // Load models and create a scenes for them
-  /*
+  
   if (navigator.mediaDevices.getUserMedia) {
     Model3DScene.init(modelScenes, animationMixers);
   }
-  */
+  
 
   function success(stream) {
     updateSaver();
@@ -76,10 +76,11 @@ function init(module) {
   const canvasContext = frameCaptureCanvasCtx2D;
 
   // Prepare Emscrypten functions
-  const onInit = module.cwrap('onInit', null, ['number', 'number', 'number']);
-  const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
-  const onProcess = module.cwrap('onProcess', 'number', ['number', 'number', 'number']);
-  const finalizeMarkers = module.cwrap('finalizeMarkers', null);
+	const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
+
+	const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
+	const onProcess = module.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
+	const finalizeMarkers = module.cwrap('finalizeMarkers', null);
 
 
   // Prepare space for initial frame and result image{cv}
@@ -98,7 +99,7 @@ function init(module) {
   let temp1 = new Uint8ClampedArray(module.HEAPU8.buffer, inputBuf, bufferSize);
   temp1.set(imageData.data, 0);
 
-  onInit(inputBuf, imageWidth, imageHeight);
+  onInitDef(inputBuf, imageWidth, imageHeight);
   module._free(inputBuf);
   module._free(temp1);
   module._free(imageData);
@@ -114,7 +115,7 @@ function init(module) {
   const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
   camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
-  let scene = new Scene3JS();
+  // let scene = new Scene3JS();
   // let scene_models = new Model3DScene();
 
   var clock = new THREE.Clock();
@@ -167,21 +168,15 @@ function init(module) {
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
 
-    if (id_marker === 3) id_marker = 5;
-    if (id_marker === 4) id_marker = 1;
-
-    /*
     let mixer = animationMixers.get(id_marker);
     if (mixer) {
       var delta = clock.getDelta();
       mixer.update( delta );
     }
-    */
+    
 
      if (id_marker >= 0) {
-     	camera = set_camera(camera, cam_par);
-       renderer.render(scene, camera);
-     /*
+
       let scene3D = modelScenes.get(id_marker);
       // console.log('3d Model');
       if (scene3D) {
@@ -190,7 +185,7 @@ function init(module) {
       } else {
         console.warn('No scene available for marker id', id_marker);
       }
-      */
+      
     } else {
       renderer.clear();
     }
@@ -250,7 +245,7 @@ const addMarkerFromImg = (module, addMarker, markerData, width, height) => {
 
 const addMarkers = (module, addMarker, finalizeMarkers) => {
   const markersFolderPath = './images/ar_markers/';
-  const nmarkers = 3;
+  const nmarkers = 6;
 
   // Virtual canvas element for capture image data from img
   const canvasImg = document.createElement('canvas');
@@ -377,8 +372,10 @@ const configJSON = `{
 "models": [
   {"id": 1, "path" : "models/whale/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
   {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
-  {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.004},
-  {"id": 0, "path" : "models/walkeri/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
+  {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
+  {"id": 4, "path" : "models/rainer/scene.gltf", "position" : [0.0, -0.4, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.0015},
+  {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.005},
+  {"id": 0, "path" : "models/walkeri/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
 ]}`;
 // Drone
 // {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
