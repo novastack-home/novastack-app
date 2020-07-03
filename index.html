@@ -15,6 +15,13 @@
         margin: 0;
       }
 
+      #OldDemo {
+	position: absolute;
+      	top: 0;
+      	left: 0;
+	z-index: 300;
+      }
+      
       #canvasOutput{
        position: absolute;
        top: 0;
@@ -41,7 +48,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        z-index: 999;
+        z-index: 13;
         font-family: 'Fira Mono', sans-serif;
         font-size: 1.4em;
         text-align: center;
@@ -95,6 +102,7 @@
       .device-list li:hover {
         background: #acbad5;
       }
+      
     </style>
 
     <script src="js/three.js" type="text/javascript"></script>
@@ -102,6 +110,8 @@
   </head> 
 
   <body id="body">
+    <a id="OldDemo" href="index_old.html">Go to Old Demo</a>
+    
     <div class="saver">
       <div class="saver-content">
         <img src="icons/trolley.svg">
