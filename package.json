@@ -26,5 +26,8 @@
     "eslint-plugin-import": "^2.20.1",
     "gulp": "^4.0.2",
     "vinyl-source-stream": "^2.0.0"
+  },
+  "dependencies": {
+    "stats.js": "^0.17.0"
   }
 }

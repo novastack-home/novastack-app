@@ -5,6 +5,8 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-var */
+const Stats = require('stats.js');
+
 const { Model3DScene } = require('./scenes/3DModel.js');
 const { Scene3JS } = require('./scenes/3JSModel.js');
 
@@ -33,6 +35,14 @@ let frameCaptureCanvas = document.createElement('canvas');
 let frameCaptureCanvasCtx2D = frameCaptureCanvas.getContext('2d');
 
 window.addEventListener('resize', handleWindowResize);
+
+// Init Stats.js. It shows performance graphs. https://github.com/mrdoob/stats.js
+var stats = new Stats();
+var statsMs = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+statsMs.showPanel( 1 );
+document.body.appendChild( stats.dom );
+document.body.appendChild( statsMs.dom );
 
 // We should get access to camera and load video metadata before calling init()
 function bootstrap(module) {
@@ -71,6 +81,9 @@ function init(module) {
   // It's used to capture frame and invisible
   const canvasVideo = frameCaptureCanvas;
   const canvasContext = frameCaptureCanvasCtx2D;
+  // This parameters improve performance
+  canvasContext.imageSmoothingEnabled = false;
+  canvasContext.globalCompositeOperation = 'copy';
 
   // Prepare Emscrypten functions
   const onInit = module.cwrap('onInit', null, ['number', 'number', 'number']);
@@ -138,11 +151,14 @@ function init(module) {
   const cam_par = [];
   // eslint-disable-next-line func-names
   const capture = function () {
+    stats.begin();
     // var t0 = Date.now();
 
+    statsMs.begin();
     canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-
     imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
+    statsMs.end();
+
     const inputBuf2 = module._malloc(bufferSize);
     module.HEAPU8.set(imageData, inputBuf2);
 
@@ -199,6 +215,7 @@ function init(module) {
     // console.log('Total time is:');
     // console.log(t4 - t0);
 
+    stats.end();
     requestAnimationFrame(capture);
   };
 
