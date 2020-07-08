@@ -38,12 +38,18 @@ let frameCaptureCanvasCtx2D = frameCaptureCanvas.getContext('2d');
 window.addEventListener('resize', handleWindowResize);
 
 // Init Stats.js. It shows performance graphs. https://github.com/mrdoob/stats.js
-var stats = new Stats();
-var statsMs = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-statsMs.showPanel( 1 );
+let stats = new Stats();
+let statsImgCapt = new Stats();
+let statsProcess = new Stats();
+
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: customstatsImgCapt.showPanel( 1 );
+statsImgCapt.showPanel( 1 );
+statsImgCapt.domElement.style.cssText = 'position:absolute;top:48px;left:0px;';
+statsProcess.showPanel( 1 );
+statsProcess.domElement.style.cssText = 'position:absolute;top:96px;left:0px;';
 document.body.appendChild( stats.dom );
-document.body.appendChild( statsMs.dom );
+document.body.appendChild( statsImgCapt.dom );
+document.body.appendChild( statsProcess.dom );
 
 // We should get access to camera and load video metadata before calling init()
 function bootstrap(module) {
@@ -83,8 +89,10 @@ function init(module) {
   const canvasVideo = frameCaptureCanvas;
   const canvasContext = frameCaptureCanvasCtx2D;
   // This parameters improve performance
+  /*
   canvasContext.imageSmoothingEnabled = false;
   canvasContext.globalCompositeOperation = 'copy';
+  */
 
   // Prepare Emscrypten functions
   const onInit = module.cwrap('onInit', null, ['number', 'number', 'number']);
@@ -125,7 +133,7 @@ function init(module) {
   const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
   camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
-  // let scene = new Scene3JS();
+  let sceneSquare = new Scene3JS();
   // let scene_models = new Model3DScene();
 
   var clock = new THREE.Clock();
@@ -155,17 +163,21 @@ function init(module) {
     stats.begin();
     // var t0 = Date.now();
 
-    statsMs.begin();
+    statsImgCapt.begin();
     canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
     imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
-    statsMs.end();
+    statsImgCapt.end();
+    statsImgCapt.update();
 
     const inputBuf2 = module._malloc(bufferSize);
     module.HEAPU8.set(imageData, inputBuf2);
 
     // let t1 = Date.now();
 
-    let result = onProcess(inputBuf2, imageWidth, imageHeight);
+    statsProcess.begin();
+		let result = onProcess(inputBuf2, imageWidth, imageHeight);
+    statsProcess.end();
+    statsProcess.update();
 
     // let t2 = Date.now();
     // console.log('onProcess time is:');
@@ -181,16 +193,16 @@ function init(module) {
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
 
-    if (id_marker === 3) id_marker = 5;
-    if (id_marker === 4) id_marker = 1;
-
     let mixer = animationMixers.get(id_marker);
     if (mixer) {
       var delta = clock.getDelta();
       mixer.update( delta );
     }
 
-     if (id_marker >= 0) {
+    if (id_marker === 3){
+      camera = set_camera(camera, cam_par);
+      renderer.render(sceneSquare, camera);
+     } else if (id_marker >= 0 ) {
       let scene3D = modelScenes.get(id_marker);
       // console.log('3d Model');
       if (scene3D) {
@@ -391,10 +403,11 @@ b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{do
 // Add model with parameters from JSON
 const configJSON = `{
 "models": [
-  {"id": 1, "path" : "models/whale/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
-  {"id": 2, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
-  {"id": 5, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.004},
-  {"id": 0, "path" : "models/walkeri/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05}
+  {"id": 0, "path" : "models/whale/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
+  {"id": 1, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
+  {"id": 2, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.004},
+  {"id": 4, "path" : "models/walkeri/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05},
+  {"id": 5, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025}
 ]}`;
 // Drone
 // {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},

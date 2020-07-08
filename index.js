@@ -37,12 +37,18 @@ let frameCaptureCanvasCtx2D = frameCaptureCanvas.getContext('2d');
 window.addEventListener('resize', handleWindowResize);
 
 // Init Stats.js. It shows performance graphs. https://github.com/mrdoob/stats.js
-var stats = new Stats();
-var statsMs = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-statsMs.showPanel( 1 );
+let stats = new Stats();
+let statsImgCapt = new Stats();
+let statsProcess = new Stats();
+
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: customstatsImgCapt.showPanel( 1 );
+statsImgCapt.showPanel( 1 );
+statsImgCapt.domElement.style.cssText = 'position:absolute;top:48px;left:0px;';
+statsProcess.showPanel( 1 );
+statsProcess.domElement.style.cssText = 'position:absolute;top:96px;left:0px;';
 document.body.appendChild( stats.dom );
-document.body.appendChild( statsMs.dom );
+document.body.appendChild( statsImgCapt.dom );
+document.body.appendChild( statsProcess.dom );
 
 // We should get access to camera and load video metadata before calling init()
 function bootstrap(module) {
@@ -86,10 +92,10 @@ function init(module) {
   canvasContext.globalCompositeOperation = 'copy';
 
   // Prepare Emscrypten functions
-  const onInit = module.cwrap('onInit', null, ['number', 'number', 'number']);
-  const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
-  const onProcess = module.cwrap('onProcess', 'number', ['number', 'number', 'number']);
-  const finalizeMarkers = module.cwrap('finalizeMarkers', null);
+	const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
+	const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
+	const onProcess = module.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
+	const finalizeMarkers = module.cwrap('finalizeMarkers', null);
 
 
   // Prepare space for initial frame and result image{cv}
@@ -108,7 +114,7 @@ function init(module) {
   let temp1 = new Uint8ClampedArray(module.HEAPU8.buffer, inputBuf, bufferSize);
   temp1.set(imageData.data, 0);
 
-  onInit(inputBuf, imageWidth, imageHeight);
+  onInitDef(inputBuf, imageWidth, imageHeight);
   module._free(inputBuf);
   module._free(temp1);
   module._free(imageData);
@@ -124,8 +130,8 @@ function init(module) {
   const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
   camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
-  // let scene = new Scene3JS();
-  // let scene_models = new Model3DScene();
+  // Prepare handmade square model
+  let sceneSquare = new Scene3JS();
 
   var clock = new THREE.Clock();
 
@@ -154,42 +160,40 @@ function init(module) {
     stats.begin();
     // var t0 = Date.now();
 
-    statsMs.begin();
+    statsImgCapt.begin();
     canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
     imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
-    statsMs.end();
+    statsImgCapt.end();
+    statsImgCapt.update();
 
     const inputBuf2 = module._malloc(bufferSize);
     module.HEAPU8.set(imageData, inputBuf2);
 
-    // let t1 = Date.now();
-
-    let result = onProcess(inputBuf2, imageWidth, imageHeight);
-
-    // let t2 = Date.now();
-    // console.log('onProcess time is:');
-    // console.log(t2 - t1);
+    // Frame counter for statistics (Disabled now)
+    let frameNum = 1; 
+    statsProcess.begin();
+		let result = onProcess(inputBuf2, imageWidth, imageHeight, frameNum);
+    statsProcess.end();
+    statsProcess.update();
 
     // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
     for (let v = 0; v < 10; v++) {
       cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
     }
-    // console.log(cam_par);
 
     // Rendering depends on marker id. If no marker in scene, it clear all.
     // It should be like ' current_3Dmodel = all_3Dmodels[ id ] '
     let id_marker = cam_par[0];
-
-    if (id_marker === 3) id_marker = 5;
-    if (id_marker === 4) id_marker = 1;
 
     let mixer = animationMixers.get(id_marker);
     if (mixer) {
       var delta = clock.getDelta();
       mixer.update( delta );
     }
-
-     if (id_marker >= 0) {
+     if (id_marker === 3){
+      camera = set_camera(camera, cam_par);
+      renderer.render(sceneSquare, camera);
+     } else if (id_marker >= 0 ) {
       let scene3D = modelScenes.get(id_marker);
       // console.log('3d Model');
       if (scene3D) {

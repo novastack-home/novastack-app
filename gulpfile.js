@@ -7,7 +7,7 @@ const b = browserify('./index.js');
 function bundle() {
   return b.bundle()
     .pipe(source('bundle.js'))
-    .pipe(dest('./js/Old_demoML2/'));
+    .pipe(dest('./'));
 }
 
 function watchFiles() {
