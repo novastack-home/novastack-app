@@ -89,10 +89,8 @@ function init(module) {
   const canvasVideo = frameCaptureCanvas;
   const canvasContext = frameCaptureCanvasCtx2D;
   // This parameters improve performance
-  /*
   canvasContext.imageSmoothingEnabled = false;
   canvasContext.globalCompositeOperation = 'copy';
-  */
 
   // Prepare Emscrypten functions
   const onInit = module.cwrap('onInit', null, ['number', 'number', 'number']);
