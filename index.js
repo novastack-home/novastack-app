@@ -42,10 +42,14 @@ let statsImgCapt = new Stats();
 let statsProcess = new Stats();
 
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: customstatsImgCapt.showPanel( 1 );
+stats.domElement.style.cssText = 'position:absolute;top:40px;left:0px;';
+
 statsImgCapt.showPanel( 1 );
-statsImgCapt.domElement.style.cssText = 'position:absolute;top:48px;left:0px;';
+statsImgCapt.domElement.style.cssText = 'position:absolute;top:88px;left:0px;';
+
 statsProcess.showPanel( 1 );
-statsProcess.domElement.style.cssText = 'position:absolute;top:96px;left:0px;';
+statsProcess.domElement.style.cssText = 'position:absolute;top:136px;left:0px;';
+
 document.body.appendChild( stats.dom );
 document.body.appendChild( statsImgCapt.dom );
 document.body.appendChild( statsProcess.dom );

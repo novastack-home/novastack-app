@@ -1,44 +1,24 @@
-// Add model with parameters from JSON
-const configJSON = `{
-"models": [
-  {"id": 0, "path" : "models/whale/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
-  {"id": 1, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
-  {"id": 2, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.004},
-  {"id": 4, "path" : "models/walkeri/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05},
-  {"id": 5, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025}
-]}`;
-// Drone
-// {"id": 3, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025},
-// AK
-// {"id": 4, "path" : "models/rainer/scene.gltf", "position" : [0.0, -0.4, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.0015},
-
-// eslint-disable-next-line max-len
-// {"id": 2, "path" : "models/bonsai-tree.glb", "position" : [0.0, 0.0, 0.5], "rotation" : [0.0, 0.0, 0.0], "scale" : 5.0}
-// {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, -0.1, 0.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.06}
-// {"id": 1, "path" : "models/diorama_low.glb", "position" : [0.1, 0.1, -1.0], "rotation" : [1.57079, 0.0, 0.0], "scale" : 0.15}
-// {"id": 0, "path" : "models/dancing/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [1.57, -1.0, 0.0], "scale" : 0.4}]
-
+// Sync
 class Model3DScene {
-  static async init(scenes, mixers) {
-    const config = JSON.parse(configJSON);
-    for (const model of config.models) {
-      try {
-        const { scene, mixer } = await loadModelScene(model, mixers);
-        scenes.set(model.id, scene);
-        mixers.set(model.id, mixer);
-      } catch (err) {
-        console.error(err);
-      }
-    }
+  constructor(animationMixers){
+    let sceneModels = new Map();
+    init3Dmodel(sceneModels, animationMixers);
+    return sceneModels;
   }
 }
 
-/*
-function init3Dmodel(sceneModels, animationMixers) {
-
-
+function init3Dmodel(sceneModels, animationMixers) {// Add model with parameters from JSON
+  const configJSON = `{
+  "models": [
+    {"id": 0, "path" : "models/whale/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.7, 0.5], "scale" : 0.25},
+    {"id": 1, "path" : "models/dancing/scene.gltf", "position" : [0.0, -1.0, 0.0], "rotation" : [0.0, -1.0, 0.0], "scale" : 1.0},
+    {"id": 2, "path" : "models/tokyo/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.004},
+    {"id": 4, "path" : "models/walkeri/scene.gltf", "position" : [0.0, -0.5, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.05},
+    {"id": 5, "path" : "models/drone/scene.gltf", "position" : [0.0, 0.0, 0.0], "rotation" : [0.0, 0.0, 0.0], "scale" : 0.025}
+  ]}`;
   // eslint-disable-next-line max-len
   // Load all model. Models should be 'glb' or 'gltf' - other types are not supported or supported badly.
+  
   let objLoader = new THREE.GLTFLoader();
   const config = JSON.parse(configJSON);
   config.models.forEach((m) => {
@@ -61,32 +41,7 @@ function init3Dmodel(sceneModels, animationMixers) {
     }, onProgress, onError);
   });
 }
-*/
 
-function loadModelScene(m, animationMixers) {
-  console.warn('Loading model', m.path);
-  return new Promise((resolve, reject) => {
-    let objLoader = new THREE.GLTFLoader();
-    objLoader.load(m.path, (g) => {
-      const model = g.scene;
-      model.scale.set(m.scale, m.scale, m.scale);
-      model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
-      model.position.set(m.position[0], m.position[1], m.position[2]);
-
-      let mixer = new THREE.AnimationMixer(g.scene);
-      g.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
-      animationMixers.set(m.id, mixer);
-
-      const sceneModel = new THREE.Scene();
-      sceneModel.add(model);
-      addLight(sceneModel);
-
-      console.warn('Created scene for model', m.path);
-
-      resolve({ scene: sceneModel, mixer });
-    }, onProgress, reject);
-  });
-}
 
 function addLight(scene){
   // Light
@@ -115,5 +70,8 @@ function onProgress( xhr ) {
 		console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
 	}
 };
+
+
+function onError(err) { console.error(err); }
 
 exports.Model3DScene = Model3DScene;

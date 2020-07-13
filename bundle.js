@@ -43,10 +43,14 @@ let statsImgCapt = new Stats();
 let statsProcess = new Stats();
 
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: customstatsImgCapt.showPanel( 1 );
+stats.domElement.style.cssText = 'position:absolute;top:40px;left:0px;';
+
 statsImgCapt.showPanel( 1 );
-statsImgCapt.domElement.style.cssText = 'position:absolute;top:48px;left:0px;';
+statsImgCapt.domElement.style.cssText = 'position:absolute;top:88px;left:0px;';
+
 statsProcess.showPanel( 1 );
-statsProcess.domElement.style.cssText = 'position:absolute;top:96px;left:0px;';
+statsProcess.domElement.style.cssText = 'position:absolute;top:136px;left:0px;';
+
 document.body.appendChild( stats.dom );
 document.body.appendChild( statsImgCapt.dom );
 document.body.appendChild( statsProcess.dom );
@@ -383,6 +387,7 @@ function requestMediaDevice() {
     }
   });
 }
+
 },{"./scenes/3DModel.js":3,"./scenes/3JSModel.js":4,"stats.js":2}],2:[function(require,module,exports){
 // stats.js - http://github.com/mrdoob/stats.js
 (function(f,e){"object"===typeof exports&&"undefined"!==typeof module?module.exports=e():"function"===typeof define&&define.amd?define(e):f.Stats=e()})(this,function(){var f=function(){function e(a){c.appendChild(a.dom);return a}function u(a){for(var d=0;d<c.children.length;d++)c.children[d].style.display=d===a?"block":"none";l=a}var l=0,c=document.createElement("div");c.style.cssText="position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";c.addEventListener("click",function(a){a.preventDefault();
@@ -435,49 +440,6 @@ function init3Dmodel(sceneModels, animationMixers) {// Add model with parameters
   });
 }
 
-// Async
-/*
-class Model3DScene {
-  static async init(scenes, mixers) {
-    const config = JSON.parse(configJSON);
-    for (const model of config.models) {
-      try {
-        const { scene, mixer } = await loadModelScene(model, mixers);
-        scenes.set(model.id, scene);
-        mixers.set(model.id, mixer);
-      } catch (err){
-        console.log("Error while init model");
-        console.error(err);
-      }
-    }
-  }
-}
-
-function loadModelScene(m, animationMixers) {
-  console.warn('Loading model', m.path);
-  return new Promise((resolve, reject) => {
-    let objLoader = new THREE.GLTFLoader();
-    objLoader.load(m.path, (g) => {
-      const model = g.scene;
-      model.scale.set(m.scale, m.scale, m.scale);
-      model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
-      model.position.set(m.position[0], m.position[1], m.position[2]);
-
-      let mixer = new THREE.AnimationMixer(g.scene);
-      g.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
-      animationMixers.set(m.id, mixer);
-
-      const sceneModel = new THREE.Scene();
-      sceneModel.add(model);
-      addLight(sceneModel);
-
-      console.warn('Created scene for model', m.path);
-
-      resolve({ scene: sceneModel, mixer });
-    }, onProgress, reject);
-  });
-}
-*/
 
 function addLight(scene){
   // Light
@@ -511,7 +473,6 @@ function onProgress( xhr ) {
 function onError(err) { console.error(err); }
 
 exports.Model3DScene = Model3DScene;
-
 
 },{}],4:[function(require,module,exports){
 class Scene3JS {
