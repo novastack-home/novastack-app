@@ -5,113 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1.0, user-scalable=no" />
     <title>Emscripten-Opencv-Video</title>
     <link href="https://fonts.googleapis.com/css?family=Fira+Mono:400,700&display=swap" rel="stylesheet">
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        padding: 0;
-        margin: 0;
-      }
-
-      #OldDemo {
-	position: absolute;
-      	top: 0;
-      	left: 0;
-	z-index: 300;
-      }
-
-      #canvasOutput{
-       position: absolute;
-       top: 0;
-       left: 0;
-       z-index: 10;
-       width: 100vw;
-       height: 100vh;
-       /* border: 2px solid blue; */
-      }
-
-      video{
-       position: absolute;
-       top: 0;
-       left: 0;
-       width: 100vw;
-       height: 100vh;
-      }
-
-      .saver {
-        position: fixed;
-        width: 100vw;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 13;
-        font-family: 'Fira Mono', sans-serif;
-        font-size: 1.4em;
-        text-align: center;
-        padding: 1em;
-      }
-
-      .saver-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .saver img {
-        width: 100%;
-        max-width: 220px;
-      }
-
-      .saver-credits {
-        position: absolute;
-        bottom: 5px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 11px;
-        text-align: center;
-      }
-
-      a {
-        color: #10284c;
-      }
-
-      a:hover {
-        color: #0090bd;
-      }
-
-      .device-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        user-select: none;
-      }
-
-      .device-list li {
-        padding: 15px;
-        margin: 15px;
-        background: #F1F1F3;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background .3s;
-      }
-
-      .device-list li:hover {
-        background: #acbad5;
-      }
-      
-    </style>
-
-    <script src="js/three.js" type="text/javascript"></script>
-    <script src="https://threejs.org/examples/js/loaders/GLTFLoader.js"></script>
-  </head> 
+    <link rel="stylesheet" href="styles.css">
+  </head>
 
   <body id="body">
-    <a id="OldDemo" href="index_old.html">Go to Old Demo</a>
-    
+    <!-- <a id="OldDemo" href="index_old.html">Go to Old Demo</a>
+
     <div class="saver">
       <div class="saver-content">
         <img src="icons/trolley.svg">
@@ -130,10 +29,16 @@
     <img id="img5" src="images/ar_markers/M5.png" hidden>
     <img id="img6" src="images/ar_markers/M6.png" hidden>
 
-    <canvas id="canvasOutput"></canvas>
+    <canvas id="canvasOutput"></canvas> -->
+    <img id="img1" src="images/ar_markers/M1.png" width="360" height="298" hidden>
+    <img id="img2" src="images/ar_markers/M2.png" hidden>
+    <img id="img3" src="images/ar_markers/M3.png" hidden>
+    <img id="img4" src="images/ar_markers/M4.png" hidden>
+    <img id="img5" src="images/ar_markers/M5.png" hidden>
+    <img id="img6" src="images/ar_markers/M6.png" hidden>
 
-    <script src="bundle.js"></script>
+    <div id="app"></div>
+    <script src="dist/index.js"></script>
     <script src="js/demo.js"></script>
   </body>
-
 </html>
