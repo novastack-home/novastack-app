@@ -5,6 +5,7 @@ import DeviceMenu from './DeviceMenu'
 import ModelMenu from './ModelMenu'
 
 import CommonGltfScene from '../scenes/CommonGltf'
+import BoomBoxScene from '../scenes/BoomBox'
 
 const initialState = {
   error: null,
@@ -17,7 +18,7 @@ const initialState = {
 const models = [
   {id: 0, name: "Whale", path : "models/whale/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.7, 0.5], scale : 0.25},
   {id: 1, name: "Dancing model", path : "models/dancing/scene.gltf", position : [0.0, -1.0, 0.0], rotation : [0.0, -1.0, 0.0], scale : 1.0},
-  {id: 2, name: "Boom Box", path : "models/BoomBox/glTF/BoomBox.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, Math.PI, 0.0], scale : 50.0},
+  {id: 2, name: "Boom Box (PBR)", path : "models/BoomBox/glTF/BoomBox.gltf", scene: BoomBoxScene, position : [0.0, 0.0, 0.0], rotation : [0.0, Math.PI, 0.0], scale : 50.0},
   {id: 4, name: "Dinosaur", path : "models/walkeri/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.05},
   {id: 5, name: "Drone", path : "models/drone/scene.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.025}
 ];
@@ -67,8 +68,8 @@ class App extends Component {
   */
   handleModelChoose = (choosedModel) => {
     let scene;
-    if (choosedModel.sceneClass) {
-      scene = new choosedModel.sceneClass(choosedModel)
+    if (choosedModel.scene) {
+      scene = new choosedModel.scene(choosedModel)
     } else {
       scene = new CommonGltfScene(choosedModel);
     }

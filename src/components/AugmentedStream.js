@@ -173,6 +173,10 @@ class AugmentedStream extends Component {
     renderer.setClearColor(0x000000, 0);
     renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
 
+    this.props.modelScene.onModelLoading = this.handleModelLoading;
+    this.props.modelScene.onReady = this.handleModelReady;
+    this.props.modelScene.init(renderer);
+
     calculateCameraScale();
     window.addEventListener('resize', this.handleWindowResize);
 
@@ -214,8 +218,6 @@ class AugmentedStream extends Component {
     video.onloadedmetadata = () => {
       frameCaptureCanvas.width = video.videoWidth;
       frameCaptureCanvas.height = video.videoHeight;
-
-      this.props.modelScene.init(this.handleModelLoading, this.handleModelReady);
 
       video.play();
       this.init();
