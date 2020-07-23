@@ -74,7 +74,7 @@ class App extends Component {
     const state = this.state
 
     if (state.isReadyForStreaming) {
-      return <AugmentedStream stream={this.stream} scene={state.scene} />
+      return <AugmentedStream stream={this.stream} modelScene={state.scene} />
     } if (state.isWaitingForModel) {
       return <ModelMenu models={models} onModelChoose={this.handleModelChoose} />;
     } if (state.isWaitingForDevice) {

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import * as THREE from 'three'
 import Stats from 'stats.js'
 
-var video, module, scene, modelId, camera, cameraScale, renderer,
+var video, module, modelScene, camera, cameraScale, renderer,
     imageWidth, imageHeight, bufferSize, onProcess, canvasOutput;
 
 // This is virtual canvas element that used for capture video frames
@@ -96,7 +96,7 @@ function capture() {
     cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
   }
 
-  if (scene && modelId == cam_par[0]) {
+  if (modelScene.scene && modelScene.modelConfig.id == cam_par[0]) {
     setCamera(cam_par);
     renderer.render(scene, camera);
   } else {
@@ -117,8 +117,7 @@ class AugmentedStream extends Component {
   canvasOutput = React.createRef()
 
   init = () => {
-    modelId = this.props.scene.modelConfig.id
-    this.props.scene.init(this.handleModelLoading, this.handleModelReady);
+    this.props.modelScene.init(this.handleModelLoading, this.handleModelReady);
     // Prepare Emscripten functions
   	const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
   	const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
@@ -185,15 +184,16 @@ class AugmentedStream extends Component {
     }
   }
 
-  handleModelLoading = (progress) => {
-    this.setState({
-      isModelLoading: true,
-      modelLoadingProgress: progress
-    })
+  handleModelLoading = (xhr) => {
+    let newState = { isModelLoading: true }
+    if ( xhr.lengthComputable ) {
+  		var percentComplete = xhr.loaded / xhr.total * 100;
+      newState.modelLoadingProgress = Math.round(percentComplete)
+  	}
+    this.setState(newState)
   }
 
-  handleModelReady = (modelScene) => {
-    scene = modelScene
+  handleModelReady = () => {
     this.setState({
       isModelLoading: false
     })
@@ -202,6 +202,7 @@ class AugmentedStream extends Component {
   componentDidMount = () => {
     video = this.video.current;
     canvasOutput = this.canvasOutput.current;
+    modelScene = this.props.modelScene
     video.srcObject = this.props.stream;
     video.onloadedmetadata = () => {
       frameCaptureCanvas.width = video.videoWidth;
