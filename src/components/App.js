@@ -4,7 +4,7 @@ import Screensaver from './Screensaver'
 import DeviceMenu from './DeviceMenu'
 import ModelMenu from './ModelMenu'
 
-import CommonGltfScene from './scenes/CommonGltf'
+import CommonGltfScene from '../scenes/CommonGltf'
 
 const initialState = {
   error: null,
