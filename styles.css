@@ -5,13 +5,20 @@
 body {
   padding: 0;
   margin: 0;
+  font-family: 'Roboto', sans-serif;
 }
 
-#OldDemo {
-position: absolute;
-  top: 0;
-  left: 0;
-z-index: 300;
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  max-width: 600px;
+  margin: auto;
+  overflow-y: auto;
 }
 
 #canvasOutput{
@@ -24,44 +31,12 @@ z-index: 300;
  /* border: 2px solid blue; */
 }
 
-video{
+video {
  position: absolute;
  top: 0;
  left: 0;
  width: 100vw;
  height: 100vh;
-}
-
-a {
-  color: #10284c;
-}
-
-a:hover {
-  color: #0090bd;
-}
-
-.screensaver-icon {
-  max-width: 300px;
-}
-
-.device-list, .models-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  user-select: none;
-}
-
-.device-list li, .models-list li {
-  padding: 15px;
-  margin: 15px;
-  background: #F1F1F3;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background .3s;
-}
-
-.device-list li:hover, .models-list li:hover {
-  background: #acbad5;
 }
 
 .loading-progress-overlay {
@@ -72,7 +47,17 @@ a:hover {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: rgba(0,0,255,.3);
+  background: rgba(255,255,255,.6);
   z-index: 99;
-  color: #fff;
+}
+
+.options-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.options-list button {
+  margin-bottom: 10px;
 }

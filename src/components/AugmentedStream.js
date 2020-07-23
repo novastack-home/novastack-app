@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
+import { Typography } from '@material-ui/core';
 import * as THREE from 'three'
 import Stats from 'stats.js'
+import ProgressBar from './ProgressBar'
+import Container from './Container'
 
 var video, module, modelScene, camera, cameraScale, renderer,
     imageWidth, imageHeight, bufferSize, onProcess, canvasOutput;
@@ -104,7 +107,7 @@ function capture() {
     cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
   }
 
-  if (modelScene.scene && modelScene.modelConfig.id == cam_par[0]) {
+  if (modelScene.scene && cam_par[0] >= 0) {
     setCamera(cam_par);
     renderer.render(modelScene.scene, camera);
   } else {
@@ -120,11 +123,35 @@ function capture() {
 }
 
 class AugmentedStream extends Component {
-  state = {}
+  state = {
+    isModelLoading: true
+  }
   video = React.createRef()
   canvasOutput = React.createRef()
 
   init = async () => {
+    // Prepare THREE.js renderer and scene
+    const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
+    camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
+
+    renderer = new THREE.WebGLRenderer({
+      canvas: canvasOutput,
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+      precision: "highp",
+      logarithmicDepthBuffer: "auto"
+    });
+    renderer.physicallyCorrectLights = true;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+    renderer.setClearColor(0x000000, 0);
+    renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
+
+    this.props.modelScene.onModelLoading = this.handleModelLoading;
+    this.props.modelScene.onReady = this.handleModelReady;
+    this.props.modelScene.init(renderer);
+
     // Prepare Emscripten functions
   	const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
   	const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
@@ -155,27 +182,6 @@ class AugmentedStream extends Component {
     // Add marker-images that should be detected on the frame
     // When all markers are added, we call 'finalize' function to prepare right id for markers.
     await addMarkers(module, addMarker, finalizeMarkers);
-
-    const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
-    camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
-
-    renderer = new THREE.WebGLRenderer({
-      canvas: canvasOutput,
-      antialias: true,
-      alpha: true,
-      powerPreference: "high-performance",
-      precision: "highp",
-      logarithmicDepthBuffer: "auto"
-    });
-    renderer.physicallyCorrectLights = true;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-    renderer.setClearColor(0x000000, 0);
-    renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
-
-    this.props.modelScene.onModelLoading = this.handleModelLoading;
-    this.props.modelScene.onReady = this.handleModelReady;
-    this.props.modelScene.init(renderer);
 
     calculateCameraScale();
     window.addEventListener('resize', this.handleWindowResize);
@@ -239,7 +245,10 @@ class AugmentedStream extends Component {
 
 const LoadingProgressOverlay = (props) => (
   <div className="loading-progress-overlay">
-    <div>Loading <span>{props.progress}%</span></div>
+    <Container>
+      <Typography variant="h5">Loading</Typography>
+      {props.progress && <ProgressBar value={props.progress} />}
+    </Container>
   </div>
 )
 

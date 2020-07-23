@@ -19,7 +19,9 @@
     "url": "https://github.com/Nemiop/nemiop.github.io/issues"
   },
   "homepage": "https://github.com/Nemiop/nemiop.github.io#readme",
-  "browserslist": [ "last 2 Chrome versions" ],
+  "browserslist": [
+    "last 2 Chrome versions"
+  ],
   "devDependencies": {
     "browserify": "^16.5.0",
     "eslint": "^6.8.0",
@@ -29,6 +31,7 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.0",
     "concurrently": "^5.2.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

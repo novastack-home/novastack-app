@@ -1,14 +1,25 @@
 import React, { Component } from 'react'
+import Container from './Container'
+import { Button } from '@material-ui/core'
 
 class ModelMenu extends Component {
   render = () => {
     const modelsList = this.props.models.map(model => {
-      return <li key={model.id} onClick={() => this.props.onModelChoose(model)}>{model.name}</li>
+      return <Button
+        key={model.id}
+        onClick={() => this.props.onModelChoose(model)}
+        variant="outlined"
+        color="primary"
+      >
+        {model.name}
+      </Button>
     });
 
-    return <ul className="models-list">
-      {modelsList}
-    </ul>
+    return <Container>
+      <div className="options-list">
+        {modelsList}
+      </div>
+    </Container>
   }
 }
 

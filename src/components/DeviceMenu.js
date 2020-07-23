@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import Container from './Container'
+import { Button } from '@material-ui/core'
 
 class DeviceMenu extends Component {
   state = {
@@ -10,12 +12,14 @@ class DeviceMenu extends Component {
     .then((devices) => {
       devices = devices.filter(d => d.kind === 'videoinput');
       devices = devices.map((device) => {
-        return <li
+        return <Button
+          variant="outlined"
+          color="primary"
           key={device.deviceId}
           onClick={() => this.props.onDeviceChoose(device.deviceId)}
         >
           {device.label}
-        </li>
+        </Button>
       });
       this.setState({devices})
     })
@@ -27,7 +31,9 @@ class DeviceMenu extends Component {
 
   render() {
     return (
-      <ul className="device-list">{this.state.devices}</ul>
+      <Container>
+        <div className="options-list">{this.state.devices}</div>
+      </Container>
     )
   }
 }
