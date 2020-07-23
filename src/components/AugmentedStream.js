@@ -98,7 +98,7 @@ function capture() {
 
   if (modelScene.scene && modelScene.modelConfig.id == cam_par[0]) {
     setCamera(cam_par);
-    renderer.render(scene, camera);
+    renderer.render(modelScene.scene, camera);
   } else {
     renderer.clear();
   }

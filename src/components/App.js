@@ -17,7 +17,7 @@ const initialState = {
 const models = [
   {id: 0, name: "Whale", path : "models/whale/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.7, 0.5], scale : 0.25},
   {id: 1, name: "Dancing model", path : "models/dancing/scene.gltf", position : [0.0, -1.0, 0.0], rotation : [0.0, -1.0, 0.0], scale : 1.0},
-  {id: 2, name: "Little Tokyo", path : "models/tokyo/scene.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.004},
+  {id: 2, name: "Boom Box", path : "models/BoomBox/glTF/BoomBox.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, Math.PI, 0.0], scale : 50.0},
   {id: 4, name: "Dinosaur", path : "models/walkeri/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.05},
   {id: 5, name: "Drone", path : "models/drone/scene.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.025}
 ];
@@ -66,7 +66,12 @@ class App extends Component {
   * Invokes when user choose model
   */
   handleModelChoose = (choosedModel) => {
-    const scene = new CommonGltfScene(choosedModel);
+    let scene;
+    if (choosedModel.sceneClass) {
+      scene = new choosedModel.sceneClass(choosedModel)
+    } else {
+      scene = new CommonGltfScene(choosedModel);
+    }
     this.setState({...initialState, isReadyForStreaming: true, scene});
   }
 
