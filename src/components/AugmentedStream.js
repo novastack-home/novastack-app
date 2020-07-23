@@ -41,9 +41,10 @@ function addMarkerFromImg(module, addMarker, markerData, width, height) {
   module._free(markerData);
 }
 
-function addMarkers(module, addMarker, finalizeMarkers) {
+async function addMarkers(module, addMarker, finalizeMarkers) {
   const markersFolderPath = './images/ar_markers/';
   const nmarkers = 6;
+  const markersLoading = [];
 
   // Virtual canvas element for capture image data from img
   const canvasImg = document.createElement('canvas');
@@ -53,15 +54,22 @@ function addMarkers(module, addMarker, finalizeMarkers) {
     let imagePath = `${markersFolderPath}M${i}.png`;
     let img = new Image();
     img.src = imagePath;
-    // console.log(img.width, img.height);
+    markersLoading.push(new Promise(resolve => {
+      img.onload = () => {
+        resolve(img);
+      }
+    }));
+  }
+
+  const loadedMarkers = await Promise.all(markersLoading)
+
+  loadedMarkers.forEach(img => {
     canvasImg.width = img.width;
     canvasImg.height = img.height;
-
     contextImg.drawImage(img, 0, 0);
     const markerData = contextImg.getImageData(0, 0, img.width, img.height);
-
     addMarkerFromImg(module, addMarker, markerData, img.width, img.height);
-  }
+  });
 
   finalizeMarkers();
 };
@@ -116,8 +124,7 @@ class AugmentedStream extends Component {
   video = React.createRef()
   canvasOutput = React.createRef()
 
-  init = () => {
-    this.props.modelScene.init(this.handleModelLoading, this.handleModelReady);
+  init = async () => {
     // Prepare Emscripten functions
   	const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
   	const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
@@ -147,7 +154,7 @@ class AugmentedStream extends Component {
 
     // Add marker-images that should be detected on the frame
     // When all markers are added, we call 'finalize' function to prepare right id for markers.
-    addMarkers(module, addMarker, finalizeMarkers);
+    await addMarkers(module, addMarker, finalizeMarkers);
 
     const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
     camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
@@ -207,6 +214,8 @@ class AugmentedStream extends Component {
     video.onloadedmetadata = () => {
       frameCaptureCanvas.width = video.videoWidth;
       frameCaptureCanvas.height = video.videoHeight;
+
+      this.props.modelScene.init(this.handleModelLoading, this.handleModelReady);
 
       video.play();
       this.init();
