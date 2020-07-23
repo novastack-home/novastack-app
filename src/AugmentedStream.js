@@ -88,7 +88,7 @@ function capture() {
 
   inputBuf2 = module._malloc(bufferSize);
   module.HEAPU8.set(imageData, inputBuf2);
-  result = onProcess(inputBuf2, imageWidth, imageHeight, frameNum);
+  result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
 
   cam_par = []
   // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
