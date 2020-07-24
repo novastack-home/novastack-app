@@ -8,7 +8,7 @@ class CommonGltfScene {
     this.scene = null
   }
 
-  init(onLoading, done) {
+  init(renderer) {
     let loader = new GLTFLoader();
     let m = this.modelConfig;
 
@@ -29,8 +29,8 @@ class CommonGltfScene {
       // sceneModels.set(m.id, sceneModel);
       // console.log('Created scene for model', m.path);
       this.scene = modelScene
-      done()
-    }, onLoading, onError);
+      this.onReady()
+    }, this.onModelLoading, onError);
   }
 }
 
