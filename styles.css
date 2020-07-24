@@ -1,0 +1,64 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  max-width: 600px;
+  margin: auto;
+  overflow-y: auto;
+}
+
+#canvasOutput{
+ position: absolute;
+ top: 0;
+ left: 0;
+ z-index: 10;
+ width: 100vw;
+ height: 100vh;
+ /* border: 2px solid blue; */
+}
+
+video {
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100vw;
+ height: 100vh;
+}
+
+.loading-progress-overlay {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(25,118,210,.6);
+  color: #fff;
+  z-index: 99;
+}
+
+.options-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.options-list button {
+  margin-bottom: 10px;
+}
