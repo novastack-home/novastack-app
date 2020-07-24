@@ -47,7 +47,8 @@ video {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: rgba(255,255,255,.6);
+  background: rgba(25,118,210,.6);
+  color: #fff;
   z-index: 99;
 }
 
