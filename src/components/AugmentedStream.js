@@ -1,5 +1,10 @@
 import React, { Component } from 'react'
-import { Typography } from '@material-ui/core';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
 import * as THREE from 'three'
 import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
@@ -17,6 +22,7 @@ canvasContext.globalCompositeOperation = 'copy';
 
 // Configure metrics
 const statsFPS = new Stats();
+statsFPS.dom.style.top = '64px'
 statsFPS.showPanel(0);
 
 window.Module = {
@@ -234,9 +240,26 @@ class AugmentedStream extends Component {
     window.removeEventListener('resize', this.handleWindowResize);
   }
 
+  dispose = () => {
+
+  }
+
   render = () => {
     return <div>
-      {this.state.isModelLoading && <LoadingProgressOverlay progress={this.state.modelLoadingProgress} />}
+      {this.state.isModelLoading
+        ? <LoadingProgressOverlay progress={this.state.modelLoadingProgress} />
+        : <React.Fragment>
+          <AppBar position="fixed">
+            <Toolbar>
+              <IconButton edge="start" color="inherit" aria-label="menu">
+                <MenuIcon />
+              </IconButton>
+              <Button color="inherit">Home</Button>
+              <Button onClick={this.dispose} color="inherit">Dispose</Button>
+            </Toolbar>
+          </AppBar>
+        </React.Fragment>
+      }
       <video id="video" ref={this.video}></video>
       <canvas id="canvasOutput" ref={this.canvasOutput}></canvas>
     </div>
