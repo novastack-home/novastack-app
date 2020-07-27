@@ -78,11 +78,18 @@ class App extends Component {
     this.setState({...initialState, isReadyForStreaming: true, scene});
   }
 
+  handleDispose = () => {
+    this.setState({
+      isReadyForStreaming: false,
+      isWaitingForModel: true
+    })
+  }
+
   render = () => {
     const state = this.state
 
     if (state.isReadyForStreaming) {
-      return <AugmentedStream stream={this.stream} modelScene={state.scene} />
+      return <AugmentedStream onDispose={this.handleDispose} stream={this.stream} modelScene={state.scene} />
     } if (state.isWaitingForModel) {
       return <ModelMenu models={models} onModelChoose={this.handleModelChoose} />;
     } if (state.isWaitingForDevice) {

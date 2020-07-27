@@ -1,11 +1,11 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
+import Scene from './Scene'
 
-class BoomBoxScene {
+class BoomBoxScene extends Scene {
   constructor(modelConfig) {
-    this.modelConfig = modelConfig
-    this.scene = null
+    super(modelConfig)
   }
 
   init(renderer) {
@@ -21,11 +21,13 @@ class BoomBoxScene {
   		.setPath( '../../textures/equirectangular/' )
 
     rgbeLoader.load( 'venice_sunset_1k.hdr', texture => {
+        this.texture = texture
 				var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 				pmremGenerator.dispose();
 
         gltfLoader.load(m.path, (g) => {
           const model = g.scene;
+          this.object = model;
           model.scale.set(m.scale, m.scale, m.scale);
           model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
           model.position.set(m.position[0], m.position[1], m.position[2]);

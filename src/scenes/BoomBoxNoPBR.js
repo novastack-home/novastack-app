@@ -1,11 +1,11 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
+import Scene from './Scene'
 
-class BoomBoxNoPBRScene {
+class BoomBoxNoPBRScene extends Scene {
   constructor(modelConfig) {
-    this.modelConfig = modelConfig
-    this.scene = null
+    super(modelConfig)
   }
 
   init(renderer) {
@@ -26,6 +26,7 @@ class BoomBoxNoPBRScene {
 
         gltfLoader.load(m.path, (g) => {
           const model = g.scene;
+          this.object = model;
           model.scale.set(m.scale, m.scale, m.scale);
           model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
           model.position.set(m.position[0], m.position[1], m.position[2]);
