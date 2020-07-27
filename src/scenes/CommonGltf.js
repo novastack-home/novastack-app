@@ -1,11 +1,11 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { addLights } from '../utils.js'
+import Scene from './Scene'
 
-class CommonGltfScene {
+class CommonGltfScene extends Scene {
   constructor(modelConfig) {
-    this.modelConfig = modelConfig
-    this.scene = null
+    super(modelConfig)
   }
 
   init(renderer) {
@@ -14,6 +14,7 @@ class CommonGltfScene {
 
     loader.load(m.path, (g) => {
       const model = g.scene;
+      this.object = model
       model.scale.set(m.scale, m.scale, m.scale);
       model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
       model.position.set(m.position[0], m.position[1], m.position[2]);

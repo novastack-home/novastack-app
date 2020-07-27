@@ -10,6 +10,10 @@ import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
 import Container from './Container'
 
+var isStreaming = false;
+var emscriptenFunctionsReady = false;
+var onProcess, addMarker, finalizeMarkers;
+
 var video, module, modelScene, camera, cameraScale, renderer,
     imageWidth, imageHeight, bufferSize, onProcess, canvasOutput;
 
@@ -94,6 +98,42 @@ function calculateCameraScale() {
   }
 }
 
+async function initEmscriptenFunctions() {
+  // Prepare Emscripten functions
+  const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
+  addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
+  onProcess = module.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
+  finalizeMarkers = module.cwrap('finalizeMarkers', null);
+
+  // Prepare space for initial frame and result image{cv}
+  // It will be rewritten everytime - you do not need to free memory in the loop
+  imageWidth = frameCaptureCanvas.width;
+  imageHeight = frameCaptureCanvas.height;
+
+  canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
+  let imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight);
+  // console.log(ImageData);
+
+  // Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
+  // After using, we need to delete allocated space, it cannot be done automaically.
+  bufferSize = imageWidth * imageHeight * 4;
+  let inputBuf = module._malloc(bufferSize);
+  let temp1 = new Uint8ClampedArray(module.HEAPU8.buffer, inputBuf, bufferSize);
+  temp1.set(imageData.data, 0);
+
+  onInitDef(inputBuf, imageWidth, imageHeight);
+  module._free(inputBuf);
+  module._free(temp1);
+  module._free(imageData);
+
+  // Add marker-images that should be detected on the frame
+  // When all markers are added, we call 'finalize' function to prepare right id for markers.
+  await addMarkers(module, addMarker, finalizeMarkers);
+
+  calculateCameraScale();
+  emscriptenFunctionsReady = true;
+}
+
 // Capture variables
 let imageData, inputBuf2, cam_par, result;
 
@@ -125,7 +165,10 @@ function capture() {
   cam_par = null;
 
   statsFPS.end()
-  requestAnimationFrame(capture);
+
+  if (isStreaming) {
+    requestAnimationFrame(capture);
+  }
 }
 
 class AugmentedStream extends Component {
@@ -136,6 +179,10 @@ class AugmentedStream extends Component {
   canvasOutput = React.createRef()
 
   init = async () => {
+    if (!emscriptenFunctionsReady) {
+      await initEmscriptenFunctions();
+    }
+
     // Prepare THREE.js renderer and scene
     const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
     camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
@@ -158,41 +205,10 @@ class AugmentedStream extends Component {
     this.props.modelScene.onReady = this.handleModelReady;
     this.props.modelScene.init(renderer);
 
-    // Prepare Emscripten functions
-  	const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
-  	const addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
-  	onProcess = module.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
-  	const finalizeMarkers = module.cwrap('finalizeMarkers', null);
-
-    // Prepare space for initial frame and result image{cv}
-    // It will be rewritten everytime - you do not need to free memory in the loop
-    imageWidth = frameCaptureCanvas.width;
-    imageHeight = frameCaptureCanvas.height;
-
-    canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-    let imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight);
-    // console.log(ImageData);
-
-    // Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
-    // After using, we need to delete allocated space, it cannot be done automaically.
-    bufferSize = imageWidth * imageHeight * 4;
-    let inputBuf = module._malloc(bufferSize);
-    let temp1 = new Uint8ClampedArray(module.HEAPU8.buffer, inputBuf, bufferSize);
-    temp1.set(imageData.data, 0);
-
-    onInitDef(inputBuf, imageWidth, imageHeight);
-    module._free(inputBuf);
-    module._free(temp1);
-    module._free(imageData);
-
-    // Add marker-images that should be detected on the frame
-    // When all markers are added, we call 'finalize' function to prepare right id for markers.
-    await addMarkers(module, addMarker, finalizeMarkers);
-
-    calculateCameraScale();
     window.addEventListener('resize', this.handleWindowResize);
 
-    document.body.appendChild(statsFPS.dom);
+    // document.body.appendChild(statsFPS.dom);
+    isStreaming = true;
     capture();
   }
 
@@ -241,7 +257,10 @@ class AugmentedStream extends Component {
   }
 
   dispose = () => {
-
+    isStreaming = false;
+    modelScene.dispose();
+    renderer.renderLists.dispose();
+    this.props.onDispose();
   }
 
   render = () => {
