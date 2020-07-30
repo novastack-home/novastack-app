@@ -6,13 +6,14 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
 import Container from './Container'
 
 var onProcess, addMarker, finalizeMarkers;
 
-var video, module, modelScene, camera, cameraScale, renderer,
+var video, module, modelScene, camera, cameraControls, cameraScale, renderer,
     imageWidth, imageHeight, bufferSize, onProcess, canvasOutput;
 
 // This is virtual canvas element that used for capture video frames
@@ -135,7 +136,8 @@ let imageData, inputBuf2, cam_par, result;
 
 class AugmentedStream extends Component {
   state = {
-    isModelLoading: true
+    isModelLoading: true,
+    isExploring: false
   }
   video = React.createRef()
   canvasOutput = React.createRef()
@@ -171,6 +173,11 @@ class AugmentedStream extends Component {
 
     window.addEventListener('resize', this.handleWindowResize);
 
+    cameraControls = new OrbitControls( camera, renderer.domElement );
+    cameraControls.enableDamping = true;
+		cameraControls.dampingFactor = 0.05;
+		cameraControls.rotateSpeed = 0.87;
+
     this.setState(
       state => Object.assign(state, {isStreaming: true}),
       () => this.capture()
@@ -180,8 +187,14 @@ class AugmentedStream extends Component {
   capture = () => {
     statsFPS.begin()
 
-    canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-    imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
+    const {isExploring} = this.state;
+
+    // Get new image data if user is not exploring model or image data not initialized
+    // Else pass saved image data
+    if (!isExploring || !imageData) {
+      canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
+      imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
+    }
 
     inputBuf2 = module._malloc(bufferSize);
     module.HEAPU8.set(imageData, inputBuf2);
@@ -194,7 +207,7 @@ class AugmentedStream extends Component {
     }
 
     if (modelScene.scene && cam_par[0] >= 0) {
-      setCamera(cam_par);
+      !isExploring && setCamera(cam_par);
       renderer.render(modelScene.scene, camera);
     } else {
       renderer.clear();
@@ -204,10 +217,11 @@ class AugmentedStream extends Component {
     module._free(result);
     cam_par = null;
 
+    cameraControls.update();
+
     statsFPS.end()
 
     if (this.state.isStreaming) {
-      console.log('capture');
       requestAnimationFrame(this.capture);
     }
   }
@@ -267,6 +281,10 @@ class AugmentedStream extends Component {
     );
   }
 
+  explore = () => {
+    this.setState(state => Object.assign(state, {isExploring: !state.isExploring}))
+  }
+
   render = () => {
     return <div>
       {this.state.isModelLoading
@@ -277,8 +295,8 @@ class AugmentedStream extends Component {
               <IconButton edge="start" color="inherit" aria-label="menu">
                 <MenuIcon />
               </IconButton>
-              <Button color="inherit">Home</Button>
               <Button onClick={this.dispose} color="inherit">Dispose</Button>
+              <Button onClick={this.explore} color={this.state.isExploring ? "secondary" : "inherit"}>Explore</Button>
             </Toolbar>
           </AppBar>
         </React.Fragment>
