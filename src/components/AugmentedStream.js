@@ -10,7 +10,6 @@ import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
 import Container from './Container'
 
-var isStreaming = false;
 var onProcess, addMarker, finalizeMarkers;
 
 var video, module, modelScene, camera, cameraScale, renderer,
@@ -27,6 +26,7 @@ canvasContext.globalCompositeOperation = 'copy';
 const statsFPS = new Stats();
 statsFPS.dom.style.top = '64px'
 statsFPS.showPanel(0);
+document.body.appendChild(statsFPS.dom);
 
 window.Module = {
   onRuntimeInitialized: () => {
@@ -133,40 +133,6 @@ async function initEmscriptenFunctions() {
 // Capture variables
 let imageData, inputBuf2, cam_par, result;
 
-function capture() {
-  statsFPS.begin()
-
-  canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-  imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
-
-  inputBuf2 = module._malloc(bufferSize);
-  module.HEAPU8.set(imageData, inputBuf2);
-  result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
-
-  cam_par = []
-  // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
-  for (let v = 0; v < 10; v++) {
-    cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
-  }
-
-  if (modelScene.scene && cam_par[0] >= 0) {
-    setCamera(cam_par);
-    renderer.render(modelScene.scene, camera);
-  } else {
-    renderer.clear();
-  }
-
-  module._free(inputBuf2);
-  module._free(result);
-  cam_par = null;
-
-  statsFPS.end()
-
-  if (isStreaming) {
-    requestAnimationFrame(capture);
-  }
-}
-
 class AugmentedStream extends Component {
   state = {
     isModelLoading: true
@@ -205,9 +171,45 @@ class AugmentedStream extends Component {
 
     window.addEventListener('resize', this.handleWindowResize);
 
-    // document.body.appendChild(statsFPS.dom);
-    isStreaming = true;
-    capture();
+    this.setState(
+      state => Object.assign(state, {isStreaming: true}),
+      () => this.capture()
+    )
+  }
+
+  capture = () => {
+    statsFPS.begin()
+
+    canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
+    imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
+
+    inputBuf2 = module._malloc(bufferSize);
+    module.HEAPU8.set(imageData, inputBuf2);
+    result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
+
+    cam_par = []
+    // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
+    for (let v = 0; v < 10; v++) {
+      cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
+    }
+
+    if (modelScene.scene && cam_par[0] >= 0) {
+      setCamera(cam_par);
+      renderer.render(modelScene.scene, camera);
+    } else {
+      renderer.clear();
+    }
+
+    module._free(inputBuf2);
+    module._free(result);
+    cam_par = null;
+
+    statsFPS.end()
+
+    if (this.state.isStreaming) {
+      console.log('capture');
+      requestAnimationFrame(this.capture);
+    }
   }
 
   handleWindowResize = () => {
@@ -255,10 +257,14 @@ class AugmentedStream extends Component {
   }
 
   dispose = () => {
-    isStreaming = false;
-    modelScene.dispose();
-    renderer.renderLists.dispose();
-    this.props.onDispose();
+    this.setState(
+      state => Object.assign(state, {isStreaming: false}),
+      () => {
+        modelScene.dispose();
+        renderer.renderLists.dispose();
+        this.props.onDispose();
+      }
+    );
   }
 
   render = () => {
