@@ -11,7 +11,6 @@ import ProgressBar from './ProgressBar'
 import Container from './Container'
 
 var isStreaming = false;
-var emscriptenFunctionsReady = false;
 var onProcess, addMarker, finalizeMarkers;
 
 var video, module, modelScene, camera, cameraScale, renderer,
@@ -129,9 +128,6 @@ async function initEmscriptenFunctions() {
   // Add marker-images that should be detected on the frame
   // When all markers are added, we call 'finalize' function to prepare right id for markers.
   await addMarkers(module, addMarker, finalizeMarkers);
-
-  calculateCameraScale();
-  emscriptenFunctionsReady = true;
 }
 
 // Capture variables
@@ -179,9 +175,11 @@ class AugmentedStream extends Component {
   canvasOutput = React.createRef()
 
   init = async () => {
-    if (!emscriptenFunctionsReady) {
+    if (!onProcess && !addMarker) {
       await initEmscriptenFunctions();
     }
+
+    calculateCameraScale();
 
     // Prepare THREE.js renderer and scene
     const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
