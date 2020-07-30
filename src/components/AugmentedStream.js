@@ -6,15 +6,14 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
 import Container from './Container'
 
-var isStreaming = false;
-var emscriptenFunctionsReady = false;
 var onProcess, addMarker, finalizeMarkers;
 
-var video, module, modelScene, camera, cameraScale, renderer,
+var video, module, modelScene, camera, cameraControls, cameraScale, renderer,
     imageWidth, imageHeight, bufferSize, onProcess, canvasOutput;
 
 // This is virtual canvas element that used for capture video frames
@@ -28,6 +27,7 @@ canvasContext.globalCompositeOperation = 'copy';
 const statsFPS = new Stats();
 statsFPS.dom.style.top = '64px'
 statsFPS.showPanel(0);
+document.body.appendChild(statsFPS.dom);
 
 window.Module = {
   onRuntimeInitialized: () => {
@@ -129,59 +129,25 @@ async function initEmscriptenFunctions() {
   // Add marker-images that should be detected on the frame
   // When all markers are added, we call 'finalize' function to prepare right id for markers.
   await addMarkers(module, addMarker, finalizeMarkers);
-
-  calculateCameraScale();
-  emscriptenFunctionsReady = true;
 }
 
 // Capture variables
 let imageData, inputBuf2, cam_par, result;
 
-function capture() {
-  statsFPS.begin()
-
-  canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-  imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
-
-  inputBuf2 = module._malloc(bufferSize);
-  module.HEAPU8.set(imageData, inputBuf2);
-  result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
-
-  cam_par = []
-  // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
-  for (let v = 0; v < 10; v++) {
-    cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
-  }
-
-  if (modelScene.scene && cam_par[0] >= 0) {
-    setCamera(cam_par);
-    renderer.render(modelScene.scene, camera);
-  } else {
-    renderer.clear();
-  }
-
-  module._free(inputBuf2);
-  module._free(result);
-  cam_par = null;
-
-  statsFPS.end()
-
-  if (isStreaming) {
-    requestAnimationFrame(capture);
-  }
-}
-
 class AugmentedStream extends Component {
   state = {
-    isModelLoading: true
+    isModelLoading: true,
+    isExploring: false
   }
   video = React.createRef()
   canvasOutput = React.createRef()
 
   init = async () => {
-    if (!emscriptenFunctionsReady) {
+    if (!onProcess && !addMarker) {
       await initEmscriptenFunctions();
     }
+
+    calculateCameraScale();
 
     // Prepare THREE.js renderer and scene
     const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
@@ -207,9 +173,57 @@ class AugmentedStream extends Component {
 
     window.addEventListener('resize', this.handleWindowResize);
 
-    // document.body.appendChild(statsFPS.dom);
-    isStreaming = true;
-    capture();
+    cameraControls = new OrbitControls( camera, renderer.domElement );
+    cameraControls.enableDamping = true;
+		cameraControls.dampingFactor = 0.05;
+		cameraControls.rotateSpeed = 0.87;
+
+    this.setState(
+      state => Object.assign(state, {isStreaming: true}),
+      () => this.capture()
+    )
+  }
+
+  capture = () => {
+    statsFPS.begin()
+
+    const {isExploring} = this.state;
+
+    // Get new image data if user is not exploring model or image data not initialized
+    // Else pass saved image data
+    if (!isExploring || !imageData) {
+      canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
+      imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
+    }
+
+    inputBuf2 = module._malloc(bufferSize);
+    module.HEAPU8.set(imageData, inputBuf2);
+    result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
+
+    cam_par = []
+    // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
+    for (let v = 0; v < 10; v++) {
+      cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
+    }
+
+    if (modelScene.scene && cam_par[0] >= 0) {
+      !isExploring && setCamera(cam_par);
+      renderer.render(modelScene.scene, camera);
+    } else {
+      renderer.clear();
+    }
+
+    module._free(inputBuf2);
+    module._free(result);
+    cam_par = null;
+
+    cameraControls.update();
+
+    statsFPS.end()
+
+    if (this.state.isStreaming) {
+      requestAnimationFrame(this.capture);
+    }
   }
 
   handleWindowResize = () => {
@@ -257,10 +271,18 @@ class AugmentedStream extends Component {
   }
 
   dispose = () => {
-    isStreaming = false;
-    modelScene.dispose();
-    renderer.renderLists.dispose();
-    this.props.onDispose();
+    this.setState(
+      state => Object.assign(state, {isStreaming: false}),
+      () => {
+        modelScene.dispose();
+        renderer.renderLists.dispose();
+        this.props.onDispose();
+      }
+    );
+  }
+
+  explore = () => {
+    this.setState(state => Object.assign(state, {isExploring: !state.isExploring}))
   }
 
   render = () => {
@@ -273,8 +295,8 @@ class AugmentedStream extends Component {
               <IconButton edge="start" color="inherit" aria-label="menu">
                 <MenuIcon />
               </IconButton>
-              <Button color="inherit">Home</Button>
               <Button onClick={this.dispose} color="inherit">Dispose</Button>
+              <Button onClick={this.explore} color={this.state.isExploring ? "secondary" : "inherit"}>Explore</Button>
             </Toolbar>
           </AppBar>
         </React.Fragment>
