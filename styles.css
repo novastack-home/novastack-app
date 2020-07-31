@@ -62,3 +62,16 @@ video {
 .options-list button {
   margin-bottom: 10px;
 }
+
+.screensaver-icon {
+  max-width: 300px;
+  max-height: 300px;
+  display: block;
+  margin: 0 auto;
+  margin-bottom: 20px;
+}
+
+.app-title {
+  text-align: center;
+  font-size: 2rem;
+}
