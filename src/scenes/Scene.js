@@ -4,6 +4,7 @@ class Scene {
     this.scene = null
     this.object = null
     this.texture = null
+    this.mixer = null
   }
 
   init() {
@@ -42,7 +43,9 @@ class Scene {
   }
 
   animate() {
-    
+    if (this.mixer) {
+      
+    }
   }
 }
 
