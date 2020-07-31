@@ -17,12 +17,12 @@ const initialState = {
 }
 
 const models = [
-  {id: 0, name: "Whale", path : "models/whale/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.7, 0.5], scale : 0.25},
-  {id: 1, name: "Dancing model", path : "models/dancing/scene.gltf", position : [0.0, -1.0, 0.0], rotation : [0.0, -1.0, 0.0], scale : 1.0},
-  {id: 2, name: "Boom Box (With environment maps)", path : "models/BoomBox/glTF/BoomBox.gltf", scene: BoomBoxScene, position : [0.0, 0.0, 0.0], rotation : [0.0, Math.PI, 0.0], scale : 60.0},
-  {id: 6, name: "Boom Box", path : "models/BoomBox/glTF/BoomBox.gltf", scene: BoomBoxNoPBRScene, position : [0.0, 0.0, 0.0], rotation : [0.0, Math.PI, 0.0], scale : 60.0},
-  {id: 4, name: "Dinosaur", path : "models/walkeri/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.05},
-  {id: 5, name: "Drone", path : "models/drone/scene.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.025}
+  {id: 0, name: "Model 1", path : "models/m1/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.2},
+  {id: 1, name: "Model 2", path : "models/m2/scene.gltf", position : [0.0, -1.0, 0.0], rotation : [0.0, 1.0, 0.0], scale : 0.005},
+  {id: 2, name: "Model 3", path : "models/m3/scene.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.1},
+  {id: 6, name: "Model 4", path : "models/m4/scene.gltf", position : [0.0, -0.7, 0.0], rotation : [0.0, Math.PI, 0.0], scale : 1.0},
+  {id: 4, name: "Model 5", path : "models/m5/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.05},
+  {id: 5, name: "Model 6", path : "models/m6/scene.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.4}
 ];
 
 class App extends Component {

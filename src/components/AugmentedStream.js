@@ -27,7 +27,7 @@ canvasContext.globalCompositeOperation = 'copy';
 const statsFPS = new Stats();
 statsFPS.dom.style.top = '64px'
 statsFPS.showPanel(0);
-document.body.appendChild(statsFPS.dom);
+// document.body.appendChild(statsFPS.dom);
 
 window.Module = {
   onRuntimeInitialized: () => {
