@@ -40,6 +40,10 @@ class CommonGltfScene extends Scene {
 							}
 					});
 
+          const mixer = new THREE.AnimationMixer(model);
+          g.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
+          this.mixer = mixer;
+
           const modelScene = new THREE.Scene();
           modelScene.add(model);
           addLights(modelScene);

@@ -42,9 +42,9 @@ class Scene {
     this.texture = null
   }
 
-  animate() {
-    if (this.mixer) {
-      
+  animate(delta) {
+    if (this.mixer !== null) {
+      this.mixer.update(delta);
     }
   }
 }
