@@ -305,7 +305,7 @@ class AugmentedStream extends Component {
           </AppBar>
         </React.Fragment>
       }
-      <video id="video" ref={this.video}></video>
+      <video id="video" ref={this.video} playsinline></video>
       <canvas id="canvasOutput" ref={this.canvasOutput}></canvas>
     </div>
   }
