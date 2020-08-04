@@ -14,7 +14,7 @@ import Container from './Container'
 var onProcess, addMarker, finalizeMarkers;
 
 var video, module, modelScene, camera, cameraControls, cameraScale, renderer,
-    imageWidth, imageHeight, bufferSize, onProcess, canvasOutput;
+    imageWidth, imageHeight, bufferSize, onProcess, canvasOutput, clock;
 
 // This is virtual canvas element that used for capture video frames
 let frameCaptureCanvas = document.createElement('canvas');
@@ -178,6 +178,8 @@ class AugmentedStream extends Component {
 		cameraControls.dampingFactor = 0.05;
 		cameraControls.rotateSpeed = 0.87;
 
+    clock = new THREE.Clock();
+
     this.setState(
       state => Object.assign(state, {isStreaming: true}),
       () => this.capture()
@@ -212,6 +214,8 @@ class AugmentedStream extends Component {
     } else {
       renderer.clear();
     }
+
+    modelScene.animate(clock.getDelta());
 
     module._free(inputBuf2);
     module._free(result);
@@ -301,7 +305,7 @@ class AugmentedStream extends Component {
           </AppBar>
         </React.Fragment>
       }
-      <video id="video" ref={this.video}></video>
+      <video id="video" ref={this.video} playsinline></video>
       <canvas id="canvasOutput" ref={this.canvasOutput}></canvas>
     </div>
   }
