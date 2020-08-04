@@ -132,12 +132,13 @@ async function initEmscriptenFunctions() {
 }
 
 // Capture variables
-let imageData, inputBuf2, cam_par, result;
+let imageData, inputBuf2, cam_par = [], result;
 
 class AugmentedStream extends Component {
   state = {
     isModelLoading: true,
-    isExploring: false
+    isExploring: false,
+    isStreaming: false
   }
   video = React.createRef()
   canvasOutput = React.createRef()
@@ -179,17 +180,12 @@ class AugmentedStream extends Component {
 		cameraControls.rotateSpeed = 0.87;
 
     clock = new THREE.Clock();
-
-    this.setState(
-      state => Object.assign(state, {isStreaming: true}),
-      () => this.capture()
-    )
   }
 
   capture = () => {
     statsFPS.begin()
 
-    const {isExploring} = this.state;
+    const {isExploring, isStreaming} = this.state;
 
     // Get new image data if user is not exploring model or image data not initialized
     // Else pass saved image data
@@ -198,14 +194,15 @@ class AugmentedStream extends Component {
       imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
     }
 
-    inputBuf2 = module._malloc(bufferSize);
-    module.HEAPU8.set(imageData, inputBuf2);
-    result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
-
-    cam_par = []
-    // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
-    for (let v = 0; v < 10; v++) {
-      cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
+    if (isStreaming) {
+      inputBuf2 = module._malloc(bufferSize);
+      module.HEAPU8.set(imageData, inputBuf2);
+      result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
+      cam_par = []
+      // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
+      for (let v = 0; v < 10; v++) {
+        cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
+      }
     }
 
     if (modelScene.scene && cam_par[0] >= 0) {
@@ -219,15 +216,12 @@ class AugmentedStream extends Component {
 
     module._free(inputBuf2);
     module._free(result);
-    cam_par = null;
 
     cameraControls.update();
 
     statsFPS.end()
 
-    if (this.state.isStreaming) {
-      requestAnimationFrame(this.capture);
-    }
+    requestAnimationFrame(this.capture);
   }
 
   handleWindowResize = () => {
@@ -289,6 +283,17 @@ class AugmentedStream extends Component {
     this.setState(state => Object.assign(state, {isExploring: !state.isExploring}))
   }
 
+  scanOrPause = () => {
+      if (this.state.isStreaming) {
+        this.setState(state => Object.assign(state, {isStreaming: false}))
+      } else {
+        this.setState(
+          state => Object.assign(state, {isStreaming: true}),
+          () => this.capture()
+        )
+      }
+  }
+
   render = () => {
     return <div>
       {this.state.isModelLoading
@@ -301,11 +306,12 @@ class AugmentedStream extends Component {
               </IconButton>
               <Button onClick={this.dispose} color="inherit">Dispose</Button>
               <Button onClick={this.explore} color={this.state.isExploring ? "secondary" : "inherit"}>Explore</Button>
+              <Button onClick={this.scanOrPause} color="inherit">{this.state.isStreaming ? 'Pause' : 'Scan'}</Button>
             </Toolbar>
           </AppBar>
         </React.Fragment>
       }
-      <video id="video" ref={this.video} playsinline></video>
+      <video id="video" ref={this.video} playsInline></video>
       <canvas id="canvasOutput" ref={this.canvasOutput}></canvas>
     </div>
   }
