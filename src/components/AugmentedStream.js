@@ -7,6 +7,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
 import Container from './Container'
@@ -17,8 +18,8 @@ import CommonGltfScene from '../scenes/CommonGltf'
 
 var onProcess, addMarker, finalizeMarkers;
 
-var video, module, modelScene, camera, cameraControls, cameraScale, renderer,
-    imageWidth, imageHeight, bufferSize, onProcess, canvasOutput, clock;
+var video, module, modelScene, camera, cameraControls, cameraScale, renderer, envTexture,
+    imageWidth, imageHeight, bufferSize, onProcess, canvasOutput, clock, pmremGenerator;
 
 // This is virtual canvas element that used for capture video frames
 let frameCaptureCanvas = document.createElement('canvas');
@@ -135,6 +136,19 @@ async function initEmscriptenFunctions() {
   await addMarkers(module, addMarker, finalizeMarkers);
 }
 
+async function loadEnvironmentTexture() {
+  return new Promise((resolve, reject) => {
+    let rgbeLoader = new RGBELoader()
+      .setDataType( THREE.UnsignedByteType )
+      .setPath( '../../textures/equirectangular/' )
+
+    rgbeLoader.load( 'venice_sunset_1k.hdr', texture => {
+      envTexture = pmremGenerator.fromEquirectangular( texture ).texture;
+      resolve(envTexture);
+    }, () => {}, reject)
+  })
+}
+
 // Capture variables
 let imageData, inputBuf2, cam_par = [], result;
 
@@ -172,9 +186,18 @@ class AugmentedStream extends Component {
     renderer.setClearColor(0x000000, 0);
     renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
 
+    pmremGenerator = new THREE.PMREMGenerator( renderer );
+    pmremGenerator.compileEquirectangularShader();
+
+    if (!envTexture) {
+      await loadEnvironmentTexture();
+    }
+    
+    pmremGenerator.dispose();
+
     modelScene.onModelLoading = this.handleModelLoading;
     modelScene.onReady = this.handleModelReady;
-    modelScene.init(renderer);
+    modelScene.init(renderer, envTexture);
 
     window.addEventListener('resize', this.handleWindowResize);
 
@@ -216,7 +239,9 @@ class AugmentedStream extends Component {
       renderer.clear();
     }
 
-    modelScene.animate(clock.getDelta());
+    if (modelScene) {
+      modelScene.animate(clock.getDelta());
+    }
 
     module._free(inputBuf2);
     module._free(result);
