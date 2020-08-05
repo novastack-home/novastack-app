@@ -4,9 +4,7 @@ import Screensaver from './Screensaver'
 import DeviceMenu from './DeviceMenu'
 import ModelMenu from './ModelMenu'
 
-import CommonGltfScene from '../scenes/CommonGltf'
-import BoomBoxScene from '../scenes/BoomBox'
-import BoomBoxNoPBRScene from '../scenes/BoomBoxNoPBR'
+import {modelsConfig as models} from '../models-config'
 
 const initialState = {
   error: null,
@@ -15,15 +13,6 @@ const initialState = {
   isWaitingForModel: false,
   isReadyForStreaming: false
 }
-
-const models = [
-  {id: 0, name: "Model 1", path : "models/m1/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.2},
-  {id: 1, name: "Model 2", path : "models/m2/scene.gltf", position : [0.0, -1.0, 0.0], rotation : [0.0, 1.0, 0.0], scale : 0.005},
-  {id: 2, name: "Model 3", path : "models/m3/scene.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.1},
-  {id: 6, name: "Model 4", path : "models/m4/scene.gltf", position : [0.0, -0.7, 0.0], rotation : [0.0, Math.PI, 0.0], scale : 1.0},
-  {id: 4, name: "Model 5", path : "models/m5/scene.gltf", position : [0.0, -0.5, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.05},
-  {id: 5, name: "Model 6", path : "models/m6/scene.gltf", position : [0.0, 0.0, 0.0], rotation : [0.0, 0.0, 0.0], scale : 0.4}
-];
 
 class App extends Component {
   state = {}
@@ -77,14 +66,8 @@ class App extends Component {
   /*
   * Invokes when user choose model
   */
-  handleModelChoose = (choosedModel) => {
-    let scene;
-    if (choosedModel.scene) {
-      scene = new choosedModel.scene(choosedModel)
-    } else {
-      scene = new CommonGltfScene(choosedModel);
-    }
-    this.setState({...initialState, isReadyForStreaming: true, scene});
+  handleModelChoose = (choosedModelId) => {
+    this.setState({...initialState, isReadyForStreaming: true, choosedModelId});
   }
 
   handleDispose = () => {
@@ -119,7 +102,7 @@ class App extends Component {
     if (!state.browserCheckPassed) {
       return <Screensaver icon="../icons/error.svg" message={"You  must be on a mobile or tablet device to continue to Novastack.app"} />
     } else if (state.isReadyForStreaming) {
-      return <AugmentedStream onDispose={this.handleDispose} stream={this.stream} modelScene={state.scene} />
+      return <AugmentedStream onDispose={this.handleDispose} stream={this.stream} choosedModelId={state.choosedModelId} />
     } if (state.isWaitingForModel) {
       return <ModelMenu models={models} onModelChoose={this.handleModelChoose} />;
     } if (state.isWaitingForDevice) {

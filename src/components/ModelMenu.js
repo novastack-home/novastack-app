@@ -7,7 +7,7 @@ class ModelMenu extends Component {
     const modelsList = this.props.models.map(model => {
       return <Button
         key={model.id}
-        onClick={() => this.props.onModelChoose(model)}
+        onClick={() => this.props.onModelChoose(model.id)}
         variant="outlined"
         color="primary"
       >

@@ -11,6 +11,10 @@ import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
 import Container from './Container'
 
+import {modelsConfig} from '../models-config'
+
+import CommonGltfScene from '../scenes/CommonGltf'
+
 var onProcess, addMarker, finalizeMarkers;
 
 var video, module, modelScene, camera, cameraControls, cameraScale, renderer,
@@ -168,9 +172,9 @@ class AugmentedStream extends Component {
     renderer.setClearColor(0x000000, 0);
     renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
 
-    this.props.modelScene.onModelLoading = this.handleModelLoading;
-    this.props.modelScene.onReady = this.handleModelReady;
-    this.props.modelScene.init(renderer);
+    modelScene.onModelLoading = this.handleModelLoading;
+    modelScene.onReady = this.handleModelReady;
+    modelScene.init(renderer);
 
     window.addEventListener('resize', this.handleWindowResize);
 
@@ -205,7 +209,7 @@ class AugmentedStream extends Component {
       }
     }
 
-    if (modelScene.scene && cam_par[0] >= 0) {
+    if (modelScene && modelScene.scene && cam_par[0] >= 0) {
       !isExploring && setCamera(cam_par);
       renderer.render(modelScene.scene, camera);
     } else {
@@ -251,9 +255,11 @@ class AugmentedStream extends Component {
   }
 
   componentDidMount = () => {
+    const choosedModelConfig = modelsConfig.filter(m => m.id === this.props.choosedModelId).shift();
+    modelScene = new CommonGltfScene(choosedModelConfig);
+
     video = this.video.current;
     canvasOutput = this.canvasOutput.current;
-    modelScene = this.props.modelScene
     video.srcObject = this.props.stream;
     video.onloadedmetadata = () => {
       frameCaptureCanvas.width = video.videoWidth;
@@ -275,6 +281,7 @@ class AugmentedStream extends Component {
         modelScene.dispose();
         renderer.dispose();
         this.props.onDispose();
+        modelScene = null;
       }
     );
   }
