@@ -37,6 +37,7 @@ class Scene {
       this.texture.dispose();
     }
 
+    this.scene.dispose();
     this.scene = null
     this.object = null
     this.texture = null
