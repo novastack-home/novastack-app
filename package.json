@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently \"parcel watch src/index.js\" \"http-server . -c-1\"",
     "build": "parcel build src/index.js",
-    "bundle": "gulp bundle"
+    "bundle": "gulp bundle",
+    "server": "http-server . -c-1"
   },
   "repository": {
     "type": "git",
@@ -24,12 +25,18 @@
     "last 2 Chrome versions"
   ],
   "devDependencies": {
+    "@babel/core": "^7.11.1",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
+    "babel-loader": "^8.1.0",
     "browserify": "^16.5.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.20.1",
     "gulp": "^4.0.2",
-    "vinyl-source-stream": "^2.0.0"
+    "vinyl-source-stream": "^2.0.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
