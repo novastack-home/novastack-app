@@ -273,7 +273,7 @@ class AugmentedStream extends Component {
       state => Object.assign(state, {isStreaming: false}),
       () => {
         modelScene.dispose();
-        renderer.renderLists.dispose();
+        renderer.dispose();
         this.props.onDispose();
       }
     );
