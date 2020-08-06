@@ -84376,6 +84376,7 @@ class AugmentedStream extends _react.Component {
         renderer.dispose();
         this.props.onDispose();
         modelScene = null;
+        cam_par = [];
       });
     });
 
@@ -84790,7 +84791,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33003" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34695" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
