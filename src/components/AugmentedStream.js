@@ -19,8 +19,8 @@ import CommonGltfScene from '../scenes/CommonGltf'
 
 var onProcess, addMarker, finalizeMarkers;
 
-var video, wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture,
-    imageWidth, imageHeight, bufferSize, onProcess, canvasOutput, clock, pmremGenerator, gltfLoader;
+var wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture,
+    imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader;
 
 // This is virtual canvas element that used for capture video frames
 let frameCaptureCanvas = document.createElement('canvas');
@@ -28,6 +28,9 @@ let canvasContext = frameCaptureCanvas.getContext('2d');
 // This parameters improve performance
 canvasContext.imageSmoothingEnabled = false;
 canvasContext.globalCompositeOperation = 'copy';
+
+var canvasOutput = document.getElementById('canvasOutput');
+var video = document.getElementById('video');
 
 gltfLoader = new GLTFLoader();
 
@@ -152,8 +155,49 @@ async function loadEnvironmentTexture() {
   })
 }
 
+function handleWindowResize() {
+  try {
+    renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
+    camera.aspect = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
+    camera.updateProjectionMatrix();
+    calculateCameraScale();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 // Capture variables
 let imageData, inputBuf2, cam_par = [], result;
+
+// Prepare THREE.js renderer and scene
+const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
+camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
+
+renderer = new THREE.WebGLRenderer({
+  canvas: canvasOutput,
+  antialias: true,
+  alpha: true,
+  powerPreference: "high-performance",
+  precision: "highp",
+  logarithmicDepthBuffer: "auto"
+});
+renderer.physicallyCorrectLights = true;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+renderer.setClearColor(0x000000, 0);
+renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
+
+pmremGenerator = new THREE.PMREMGenerator( renderer );
+pmremGenerator.compileEquirectangularShader();
+
+window.addEventListener('resize', handleWindowResize);
+
+cameraControls = new OrbitControls( camera, renderer.domElement );
+cameraControls.enableDamping = true;
+cameraControls.dampingFactor = 0.05;
+cameraControls.rotateSpeed = 0.87;
+
+clock = new THREE.Clock();
 
 class AugmentedStream extends Component {
   state = {
@@ -161,8 +205,6 @@ class AugmentedStream extends Component {
     isExploring: false,
     isStreaming: false
   }
-  video = React.createRef()
-  canvasOutput = React.createRef()
 
   init = async () => {
     if (!onProcess && !addMarker) {
@@ -170,27 +212,6 @@ class AugmentedStream extends Component {
     }
 
     calculateCameraScale();
-
-    // Prepare THREE.js renderer and scene
-    const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
-    camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
-
-    renderer = new THREE.WebGLRenderer({
-      canvas: canvasOutput,
-      antialias: true,
-      alpha: true,
-      powerPreference: "high-performance",
-      precision: "highp",
-      logarithmicDepthBuffer: "auto"
-    });
-    renderer.physicallyCorrectLights = true;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-    renderer.setClearColor(0x000000, 0);
-    renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
-
-    pmremGenerator = new THREE.PMREMGenerator( renderer );
-    pmremGenerator.compileEquirectangularShader();
 
     if (!envTexture) {
       await loadEnvironmentTexture();
@@ -201,15 +222,6 @@ class AugmentedStream extends Component {
     modelScene.onModelLoading = this.handleModelLoading;
     modelScene.onReady = this.handleModelReady;
     modelScene.init(gltfLoader, renderer, envTexture);
-
-    window.addEventListener('resize', this.handleWindowResize);
-
-    cameraControls = new OrbitControls( camera, renderer.domElement );
-    cameraControls.enableDamping = true;
-		cameraControls.dampingFactor = 0.05;
-		cameraControls.rotateSpeed = 0.87;
-
-    clock = new THREE.Clock();
   }
 
   capture = () => {
@@ -256,17 +268,6 @@ class AugmentedStream extends Component {
     requestAnimationFrame(this.capture);
   }
 
-  handleWindowResize = () => {
-    try {
-      renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
-      camera.aspect = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
-      camera.updateProjectionMatrix();
-      calculateCameraScale();
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   handleModelLoading = (xhr) => {
     let newState = { isModelLoading: true }
     if ( xhr.lengthComputable ) {
@@ -286,8 +287,6 @@ class AugmentedStream extends Component {
     const choosedModelConfig = modelsConfig.filter(m => m.id === this.props.choosedModelId).shift();
     modelScene = new CommonGltfScene(choosedModelConfig);
 
-    video = this.video.current;
-    canvasOutput = this.canvasOutput.current;
     video.srcObject = this.props.stream;
     video.onloadedmetadata = () => {
       frameCaptureCanvas.width = video.videoWidth;
@@ -298,16 +297,11 @@ class AugmentedStream extends Component {
     };
   }
 
-  componentWillUnmount = () => {
-    window.removeEventListener('resize', this.handleWindowResize);
-  }
-
   dispose = () => {
     this.setState(
       state => Object.assign(state, {isStreaming: false}),
       () => {
         modelScene.dispose();
-        renderer.dispose();
         this.props.onDispose();
         modelScene = null;
         cam_par = [];
@@ -347,8 +341,6 @@ class AugmentedStream extends Component {
           </AppBar>
         </React.Fragment>
       }
-      <video id="video" ref={this.video} playsInline></video>
-      <canvas id="canvasOutput" ref={this.canvasOutput}></canvas>
     </div>
   }
 }
