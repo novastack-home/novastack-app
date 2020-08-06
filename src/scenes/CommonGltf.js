@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import Scene from './Scene'
 
 class CommonGltfScene extends Scene {
@@ -7,13 +6,11 @@ class CommonGltfScene extends Scene {
     super(modelConfig)
   }
 
-  init(renderer, envMap) {
+  init(loader, renderer, envMap) {
     this.configureRenderer(renderer);
 
     let m = this.modelConfig;
-    let gltfLoader = new GLTFLoader();
-
-      gltfLoader.load(m.path, (g) => {
+      loader.load(m.path, (g) => {
         const model = g.scene;
         this.object = model;
         model.scale.set(m.scale, m.scale, m.scale);

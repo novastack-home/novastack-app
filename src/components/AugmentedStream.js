@@ -8,6 +8,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
 import Container from './Container'
@@ -19,7 +20,7 @@ import CommonGltfScene from '../scenes/CommonGltf'
 var onProcess, addMarker, finalizeMarkers;
 
 var video, module, modelScene, camera, cameraControls, cameraScale, renderer, envTexture,
-    imageWidth, imageHeight, bufferSize, onProcess, canvasOutput, clock, pmremGenerator;
+    imageWidth, imageHeight, bufferSize, onProcess, canvasOutput, clock, pmremGenerator, gltfLoader;
 
 // This is virtual canvas element that used for capture video frames
 let frameCaptureCanvas = document.createElement('canvas');
@@ -27,6 +28,8 @@ let canvasContext = frameCaptureCanvas.getContext('2d');
 // This parameters improve performance
 canvasContext.imageSmoothingEnabled = false;
 canvasContext.globalCompositeOperation = 'copy';
+
+gltfLoader = new GLTFLoader();
 
 // Configure metrics
 const statsFPS = new Stats();
@@ -192,12 +195,12 @@ class AugmentedStream extends Component {
     if (!envTexture) {
       await loadEnvironmentTexture();
     }
-    
+
     pmremGenerator.dispose();
 
     modelScene.onModelLoading = this.handleModelLoading;
     modelScene.onReady = this.handleModelReady;
-    modelScene.init(renderer, envTexture);
+    modelScene.init(gltfLoader, renderer, envTexture);
 
     window.addEventListener('resize', this.handleWindowResize);
 
