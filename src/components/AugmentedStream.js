@@ -254,7 +254,7 @@ class AugmentedStream extends Component {
       renderer.clear();
     }
 
-    if (modelScene) {
+    if (modelScene && isStreaming) {
       modelScene.animate(clock.getDelta());
     }
 

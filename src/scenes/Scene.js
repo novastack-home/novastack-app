@@ -47,10 +47,14 @@ class Scene {
       })
     }
 
+    this.mixer.stopAllAction();
+    this.mixer.uncacheAction();
+
     this.scene.dispose();
     this.scene = null
     this.object = null
     this.texture = null
+    this.mixer = null;
   }
 
   animate(delta) {
