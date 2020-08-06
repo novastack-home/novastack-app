@@ -31,6 +31,12 @@ body {
  /* border: 2px solid blue; */
 }
 
+#app {
+  position: relative;
+  z-index: 99;
+  background: #fff;
+}
+
 video {
  position: absolute;
  top: 0;
