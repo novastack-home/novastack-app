@@ -303,6 +303,8 @@ class AugmentedStream extends Component {
       () => {
         modelScene.dispose();
         this.props.onDispose();
+        renderer.renderLists.dispose();
+        renderer.dispose();
         modelScene = null;
         cam_par = [];
       }
