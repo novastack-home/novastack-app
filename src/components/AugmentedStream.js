@@ -19,7 +19,7 @@ import CommonGltfScene from '../scenes/CommonGltf'
 
 var onProcess, addMarker, finalizeMarkers;
 
-var video, module, modelScene, camera, cameraControls, cameraScale, renderer, envTexture,
+var video, wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture,
     imageWidth, imageHeight, bufferSize, onProcess, canvasOutput, clock, pmremGenerator, gltfLoader;
 
 // This is virtual canvas element that used for capture video frames
@@ -39,7 +39,7 @@ statsFPS.showPanel(0);
 
 window.Module = {
   onRuntimeInitialized: () => {
-    module = window.Module
+    wasmModule = window.Module
   },
 };
 
@@ -50,19 +50,19 @@ function setCamera(par) {
   camera.up.set(par[7], par[8], par[9]);
 }
 
-function addMarkerFromImg(module, addMarker, markerData, width, height) {
+function addMarkerFromImg(wasmModule, addMarker, markerData, width, height) {
   console.log('Load Marker');
   let bufferSizeMarker = width * height * 4;
 
-  let markerBuf = module._malloc(bufferSizeMarker);
-  module.HEAPU8.set(markerData.data, markerBuf);
+  let markerBuf = wasmModule._malloc(bufferSizeMarker);
+  wasmModule.HEAPU8.set(markerData.data, markerBuf);
 
   addMarker(markerBuf, width, height);
-  module._free(markerBuf);
-  module._free(markerData);
+  wasmModule._free(markerBuf);
+  wasmModule._free(markerData);
 }
 
-async function addMarkers(module, addMarker, finalizeMarkers) {
+async function addMarkers(wasmModule, addMarker, finalizeMarkers) {
   const markersFolderPath = './images/ar_markers/';
   const nmarkers = 6;
   const markersLoading = [];
@@ -89,7 +89,7 @@ async function addMarkers(module, addMarker, finalizeMarkers) {
     canvasImg.height = img.height;
     contextImg.drawImage(img, 0, 0);
     const markerData = contextImg.getImageData(0, 0, img.width, img.height);
-    addMarkerFromImg(module, addMarker, markerData, img.width, img.height);
+    addMarkerFromImg(wasmModule, addMarker, markerData, img.width, img.height);
   });
 
   finalizeMarkers();
@@ -108,10 +108,10 @@ function calculateCameraScale() {
 
 async function initEmscriptenFunctions() {
   // Prepare Emscripten functions
-  const onInitDef = module.cwrap('onInitDef', null, ['number', 'number', 'number']);
-  addMarker = module.cwrap('addMarker', null, ['number', 'number', 'number']);
-  onProcess = module.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
-  finalizeMarkers = module.cwrap('finalizeMarkers', null);
+  const onInitDef = wasmModule.cwrap('onInitDef', null, ['number', 'number', 'number']);
+  addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
+  onProcess = wasmModule.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
+  finalizeMarkers = wasmModule.cwrap('finalizeMarkers', null);
 
   // Prepare space for initial frame and result image{cv}
   // It will be rewritten everytime - you do not need to free memory in the loop
@@ -125,18 +125,18 @@ async function initEmscriptenFunctions() {
   // Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
   // After using, we need to delete allocated space, it cannot be done automaically.
   bufferSize = imageWidth * imageHeight * 4;
-  let inputBuf = module._malloc(bufferSize);
-  let temp1 = new Uint8ClampedArray(module.HEAPU8.buffer, inputBuf, bufferSize);
+  let inputBuf = wasmModule._malloc(bufferSize);
+  let temp1 = new Uint8ClampedArray(wasmModule.HEAPU8.buffer, inputBuf, bufferSize);
   temp1.set(imageData.data, 0);
 
   onInitDef(inputBuf, imageWidth, imageHeight);
-  module._free(inputBuf);
-  module._free(temp1);
-  module._free(imageData);
+  wasmModule._free(inputBuf);
+  wasmModule._free(temp1);
+  wasmModule._free(imageData);
 
   // Add marker-images that should be detected on the frame
   // When all markers are added, we call 'finalize' function to prepare right id for markers.
-  await addMarkers(module, addMarker, finalizeMarkers);
+  await addMarkers(wasmModule, addMarker, finalizeMarkers);
 }
 
 async function loadEnvironmentTexture() {
@@ -225,8 +225,8 @@ class AugmentedStream extends Component {
     }
 
     if (isStreaming) {
-      inputBuf2 = module._malloc(bufferSize);
-      module.HEAPU8.set(imageData, inputBuf2);
+      inputBuf2 = wasmModule._malloc(bufferSize);
+      wasmModule.HEAPU8.set(imageData, inputBuf2);
       result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
       cam_par = []
       // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
@@ -246,8 +246,8 @@ class AugmentedStream extends Component {
       modelScene.animate(clock.getDelta());
     }
 
-    module._free(inputBuf2);
-    module._free(result);
+    wasmModule._free(inputBuf2);
+    wasmModule._free(result);
 
     cameraControls.update();
 
