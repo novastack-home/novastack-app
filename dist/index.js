@@ -83844,10 +83844,10 @@ const modelsConfig = [{
 }, {
   id: 2,
   name: "Model 3",
-  path: "models/m3/scene.gltf",
-  position: [0.0, 0.0, 0.0],
+  path: "models/dancing/scene.gltf",
+  position: [0.0, -1.0, 0.0],
   rotation: [0.0, 0.0, 0.0],
-  scale: 0.1
+  scale: 1.0
 }, {
   id: 6,
   name: "Model 4",
