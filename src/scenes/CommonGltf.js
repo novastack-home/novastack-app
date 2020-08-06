@@ -1,6 +1,4 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import Scene from './Scene'
 
 class CommonGltfScene extends Scene {
@@ -8,52 +6,38 @@ class CommonGltfScene extends Scene {
     super(modelConfig)
   }
 
-  init(renderer) {
+  init(loader, renderer, envMap) {
     this.configureRenderer(renderer);
 
-    var pmremGenerator = new THREE.PMREMGenerator( renderer );
-		pmremGenerator.compileEquirectangularShader();
-
     let m = this.modelConfig;
-    let gltfLoader = new GLTFLoader();
-    let rgbeLoader = new RGBELoader()
-  		.setDataType( THREE.UnsignedByteType )
-  		.setPath( '../../textures/equirectangular/' )
+      loader.load(m.path, (g) => {
+        const model = g.scene;
+        this.object = model;
+        model.scale.set(m.scale, m.scale, m.scale);
+        model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
+        model.position.set(m.position[0], m.position[1], m.position[2]);
 
-    rgbeLoader.load( 'venice_sunset_1k.hdr', texture => {
-        this.texture = texture
-				var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-				pmremGenerator.dispose();
+        model.traverse( function ( node ) {
+						if (envMap && node.material && ( node.material.isMeshStandardMaterial ||
+							 ( node.material.isShaderMaterial && node.material.envMap !== undefined ) ) ) {
+							node.material.envMap = envMap;
+							node.material.envMapIntensity = 1.5; // boombox seems too dark otherwise
+						}
+				});
 
-        gltfLoader.load(m.path, (g) => {
-          const model = g.scene;
-          this.object = model;
-          model.scale.set(m.scale, m.scale, m.scale);
-          model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
-          model.position.set(m.position[0], m.position[1], m.position[2]);
+        const mixer = new THREE.AnimationMixer(model);
+        g.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
+        this.mixer = mixer;
 
-          model.traverse( function ( node ) {
-							if ( node.material && ( node.material.isMeshStandardMaterial ||
-								 ( node.material.isShaderMaterial && node.material.envMap !== undefined ) ) ) {
-								node.material.envMap = envMap;
-								node.material.envMapIntensity = 1.5; // boombox seems too dark otherwise
-							}
-					});
+        const modelScene = new THREE.Scene();
+        modelScene.add(model);
+        addLights(modelScene);
 
-          const mixer = new THREE.AnimationMixer(model);
-          g.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
-          this.mixer = mixer;
-
-          const modelScene = new THREE.Scene();
-          modelScene.add(model);
-          addLights(modelScene);
-
-          // sceneModels.set(m.id, sceneModel);
-          // console.log('Created scene for model', m.path);
-          this.scene = modelScene
-          this.onReady()
-        }, this.onModelLoading, onError);
-		});
+        // sceneModels.set(m.id, sceneModel);
+        // console.log('Created scene for model', m.path);
+        this.scene = modelScene
+        this.onReady()
+      }, this.onModelLoading, onError);
   }
 
   configureRenderer(renderer) {

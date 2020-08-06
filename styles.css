@@ -71,6 +71,10 @@ video {
   margin-bottom: 20px;
 }
 
+.screensaver-message {
+  text-align: center;
+}
+
 .app-title {
   text-align: center;
   font-size: 2rem;

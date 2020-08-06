@@ -30,11 +30,21 @@ class Scene {
             node.material.dispose()
           }
         }
+
+        if (node.material && node.material.envMap && node.material.envMap.dispose) {
+          node.material.envMap.dispose();
+        }
       });
     }
 
     if (this.texture) {
       this.texture.dispose();
+    }
+
+    if (this.scene) {
+      this.scene.children.forEach(obj => {
+        this.scene.remove(obj)
+      })
     }
 
     this.scene.dispose();
