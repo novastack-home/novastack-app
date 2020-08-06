@@ -84687,7 +84687,7 @@ class App extends _react.Component {
     });
 
     _defineProperty(this, "checkBrowser", () => {
-      if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return true;
+      if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "nemiop.github.io") return true;
       let check = false;
 
       (function (a) {
