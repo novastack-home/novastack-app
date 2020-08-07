@@ -239,7 +239,7 @@ class AugmentedStream extends Component {
         }
     }
 
-    if (isStreaming && cam_par[0] < 0) {
+    if (isStreaming) {
       inputBuf2 = wasmModule._malloc(bufferSize);
       wasmModule.HEAPU8.set(imageData, inputBuf2);
       result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
