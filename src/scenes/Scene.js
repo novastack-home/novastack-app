@@ -3,7 +3,6 @@ class Scene {
     this.modelConfig = modelConfig
     this.scene = null
     this.object = null
-    this.texture = null
     this.mixer = null
   }
 
@@ -31,14 +30,15 @@ class Scene {
           }
         }
 
+        if (node.material && node.material.map) {
+          node.material.map.dispose();
+          node.material.map = undefined;
+        }
+
         if (node.material && node.material.envMap && node.material.envMap.dispose) {
           node.material.envMap.dispose();
         }
       });
-    }
-
-    if (this.texture) {
-      this.texture.dispose();
     }
 
     if (this.scene) {
