@@ -310,6 +310,7 @@ class AugmentedStream extends Component {
         renderer.dispose();
         modelScene = null;
         cam_par = [];
+        canvasContext.clearRect(0, 0, frameCaptureCanvas.width, frameCaptureCanvas.height);
       }
     );
   }
