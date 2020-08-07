@@ -232,10 +232,11 @@ class AugmentedStream extends Component {
     // Get new image data if user is not exploring model or image data not initialized
     // Else pass saved image data
     if (!isExploring || !imageData) {
-      if (!cam_par && !(cam_par[0] >= 0)) {
-        canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-        imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
-      }
+        console.log(cam_par);
+        if (cam_par.length < 1 || cam_par[0] < 0) {
+          canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
+          imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
+        }
     }
 
     if (isStreaming) {
@@ -308,7 +309,7 @@ class AugmentedStream extends Component {
         renderer.renderLists.dispose();
         renderer.dispose();
         modelScene = null;
-        cam_par = [];
+        // cam_par = [];
       }
     );
   }
