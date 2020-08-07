@@ -25,7 +25,7 @@ var wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTe
 var requestedFrameId;
 
 // This is virtual canvas element that used for capture video frames
-let frameCaptureCanvas = document.createElement('canvas');
+let frameCaptureCanvas = document.getElementById('captureCanvas');
 let canvasContext = frameCaptureCanvas.getContext('2d');
 // This parameters improve performance
 canvasContext.imageSmoothingEnabled = false;
@@ -310,6 +310,7 @@ class AugmentedStream extends Component {
         renderer.dispose();
         modelScene = null;
         cam_par = [];
+        canvasContext.clearRect(0, 0, frameCaptureCanvas.width, frameCaptureCanvas.height);
       }
     );
   }
