@@ -57,6 +57,11 @@ To add a new marker you need to modify `index.html` and `index.js` files:
 2) Change the value of `nmarkers` variable in `addMarkers` function of `src/components/AugmentedStream.js`. This function add all markers with name `M{id_number}`, where id_number is from 1 to `nmarker`.
 
 
+### Change environment texture
+To change texture that will be used as environment map you need to modify `loadEnvironmentTexture` function at `src/components/AugmentedStream.js`.
+Textures are stored in `textures/equirectangular` folder. Change first argument of `rgbeLoader.load` to load another texture.
+
+
 ### Save changes and build bundle
 After all changes, you need to build with the whole code. For this purposes, we use Node.js.
 
