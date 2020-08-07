@@ -84084,7 +84084,7 @@ var onProcess, addMarker, finalizeMarkers;
 var wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture, imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader;
 var requestedFrameId; // This is virtual canvas element that used for capture video frames
 
-let frameCaptureCanvas = document.createElement('canvas');
+let frameCaptureCanvas = document.getElementById('captureCanvas');
 let canvasContext = frameCaptureCanvas.getContext('2d'); // This parameters improve performance
 
 canvasContext.imageSmoothingEnabled = false;
@@ -84776,7 +84776,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64936" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57448" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -85,3 +85,8 @@ video {
   text-align: center;
   font-size: 2rem;
 }
+
+#captureCanvas {
+    position: fixed;
+    right: -9999px;
+}
