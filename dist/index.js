@@ -83883,7 +83883,6 @@ class Scene {
     this.modelConfig = modelConfig;
     this.scene = null;
     this.object = null;
-    this.texture = null;
     this.mixer = null;
   }
 
@@ -83908,14 +83907,15 @@ class Scene {
           }
         }
 
+        if (node.material && node.material.map) {
+          node.material.map.dispose();
+          node.material.map = undefined;
+        }
+
         if (node.material && node.material.envMap && node.material.envMap.dispose) {
           node.material.envMap.dispose();
         }
       });
-    }
-
-    if (this.texture) {
-      this.texture.dispose();
     }
 
     if (this.scene) {
@@ -84081,7 +84081,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var onProcess, addMarker, finalizeMarkers;
-var wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture, imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader; // This is virtual canvas element that used for capture video frames
+var wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture, imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader;
+var requestedFrameId; // This is virtual canvas element that used for capture video frames
 
 let frameCaptureCanvas = document.createElement('canvas');
 let canvasContext = frameCaptureCanvas.getContext('2d'); // This parameters improve performance
@@ -84361,11 +84362,13 @@ class AugmentedStream extends _react.Component {
       this.setState(state => Object.assign(state, {
         isStreaming: false
       }), () => {
+        cancelAnimationFrame(requestedFrameId);
         modelScene.dispose();
         this.props.onDispose();
         renderer.renderLists.dispose();
         renderer.dispose();
-        modelScene = null; // cam_par = [];
+        modelScene = null;
+        cam_par = [];
       });
     });
 

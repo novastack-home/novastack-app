@@ -22,6 +22,8 @@ var onProcess, addMarker, finalizeMarkers;
 var wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture,
     imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader;
 
+var requestedFrameId;
+
 // This is virtual canvas element that used for capture video frames
 let frameCaptureCanvas = document.createElement('canvas');
 let canvasContext = frameCaptureCanvas.getContext('2d');
@@ -301,12 +303,13 @@ class AugmentedStream extends Component {
     this.setState(
       state => Object.assign(state, {isStreaming: false}),
       () => {
+        cancelAnimationFrame(requestedFrameId);
         modelScene.dispose();
         this.props.onDispose();
         renderer.renderLists.dispose();
         renderer.dispose();
         modelScene = null;
-        // cam_par = [];
+        cam_par = [];
       }
     );
   }
