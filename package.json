@@ -1,44 +1,54 @@
 {
-  "name": "nemiop.github.io",
-  "version": "1.0.0",
-  "description": "Just to watch",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"parcel watch src/index.js\" \"http-server . -c-1\"",
-    "build": "parcel build src/index.js",
-    "bundle": "gulp bundle"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Nemiop/nemiop.github.io.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Nemiop/nemiop.github.io/issues"
-  },
-  "homepage": "https://github.com/Nemiop/nemiop.github.io#readme",
-  "browserslist": [
-    "last 2 Chrome versions"
-  ],
-  "devDependencies": {
-    "browserify": "^16.5.0",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.20.1",
-    "gulp": "^4.0.2",
-    "vinyl-source-stream": "^2.0.0"
-  },
-  "dependencies": {
-    "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
-    "@types/react": "^16.9.43",
-    "concurrently": "^5.2.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "stats.js": "^0.17.0",
-    "three": "^0.118.3"
-  }
+    "name": "nemiop.github.io",
+    "version": "1.0.0",
+    "description": "Just to watch",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "concurrently \"parcel watch src/*\" \"http-server . -c-1\"",
+        "build": "parcel build src/index.js",
+        "bundle": "gulp bundle",
+        "server": "http-server . -c-1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nemiop/nemiop.github.io.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Nemiop/nemiop.github.io/issues"
+    },
+    "homepage": "https://github.com/Nemiop/nemiop.github.io#readme",
+    "browserslist": [
+        "last 2 Chrome versions"
+    ],
+    "devDependencies": {
+        "@babel/core": "^7.11.1",
+        "@babel/plugin-proposal-class-properties": "^7.10.4",
+        "@babel/preset-react": "^7.10.4",
+        "babel-loader": "^8.1.0",
+        "browserify": "^16.5.0",
+        "eslint": "^6.8.0",
+        "eslint-config-airbnb-base": "^14.0.0",
+        "eslint-plugin-import": "^2.20.1",
+        "gulp": "^4.0.2",
+        "node-sass": "^4.14.1",
+        "sass": "^1.26.10",
+        "sass-loader": "^9.0.3",
+        "vinyl-source-stream": "^2.0.0",
+        "webpack": "^4.44.1",
+        "webpack-cli": "^3.3.12"
+    },
+    "dependencies": {
+        "@material-ui/core": "^4.11.0",
+        "@material-ui/icons": "^4.9.1",
+        "@types/react": "^16.9.43",
+        "concurrently": "^5.2.0",
+        "react": "^16.13.1",
+        "react-dom": "^16.13.1",
+        "stats.js": "^0.17.0",
+        "three": "^0.118.3"
+    }
 }

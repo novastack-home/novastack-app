@@ -3,7 +3,6 @@ class Scene {
     this.modelConfig = modelConfig
     this.scene = null
     this.object = null
-    this.texture = null
     this.mixer = null
   }
 
@@ -30,21 +29,37 @@ class Scene {
             node.material.dispose()
           }
         }
+
+        if (node.material && node.material.map) {
+          node.material.map.dispose();
+          node.material.map = undefined;
+        }
+
+        if (node.material && node.material.envMap && node.material.envMap.dispose) {
+          node.material.envMap.dispose();
+        }
       });
     }
 
-    if (this.texture) {
-      this.texture.dispose();
+    if (this.scene) {
+      this.scene.children.forEach(obj => {
+        this.scene.remove(obj)
+      })
     }
 
+    this.mixer.stopAllAction();
+    this.mixer.uncacheAction();
+
+    this.scene.dispose();
     this.scene = null
     this.object = null
     this.texture = null
+    this.mixer = null;
   }
 
-  animate() {
-    if (this.mixer) {
-      
+  animate(delta) {
+    if (this.mixer !== null) {
+      this.mixer.update(delta);
     }
   }
 }
