@@ -6,38 +6,35 @@ class CommonGltfScene extends Scene {
     super(modelConfig)
   }
 
-  init(loader, renderer, envMap) {
+  init(gltf, renderer, envMap) {
     this.configureRenderer(renderer);
 
     let m = this.modelConfig;
-      loader.load(m.path, (g) => {
-        const model = g.scene;
-        this.object = model;
-        model.scale.set(m.scale, m.scale, m.scale);
-        model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
-        model.position.set(m.position[0], m.position[1], m.position[2]);
+    const model = gltf.scene;
+    this.object = model;
+    model.scale.set(m.scale, m.scale, m.scale);
+    model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
+    model.position.set(m.position[0], m.position[1], m.position[2]);
 
-        model.traverse( function ( node ) {
-						if (envMap && node.material && ( node.material.isMeshStandardMaterial ||
-							 ( node.material.isShaderMaterial && node.material.envMap !== undefined ) ) ) {
-							node.material.envMap = envMap;
-							node.material.envMapIntensity = 1.5; // boombox seems too dark otherwise
-						}
-				});
+    model.traverse( function ( node ) {
+        if (envMap && node.material && ( node.material.isMeshStandardMaterial ||
+            ( node.material.isShaderMaterial && node.material.envMap !== undefined ) ) ) {
+          node.material.envMap = envMap;
+          node.material.envMapIntensity = 1.5; // boombox seems too dark otherwise
+        }
+    });
 
-        const mixer = new THREE.AnimationMixer(model);
-        g.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
-        this.mixer = mixer;
+    const mixer = new THREE.AnimationMixer(model);
+    gltf.animations.forEach((clip) => {mixer.clipAction(clip).play(); });
+    this.mixer = mixer;
 
-        const modelScene = new THREE.Scene();
-        modelScene.add(model);
-        addLights(modelScene);
+    const modelScene = new THREE.Scene();
+    modelScene.add(model);
+    addLights(modelScene);
 
-        // sceneModels.set(m.id, sceneModel);
-        // console.log('Created scene for model', m.path);
-        this.scene = modelScene
-        this.onReady()
-      }, this.onModelLoading, onError);
+    // sceneModels.set(m.id, sceneModel);
+    // console.log('Created scene for model', m.path);
+    this.scene = modelScene
   }
 
   configureRenderer(renderer) {

@@ -67,8 +67,8 @@ class App extends Component {
   /**
    * Invokes when user choose model
    */
-  handleModelChoose = (choosedModelId) => {
-    this.setState({...initialState, isReadyForStreaming: true, choosedModelId});
+  handleModelChoose = (choosedModelConfig) => {
+    this.setState({...initialState, isReadyForStreaming: true, choosedModelConfig});
   }
 
   handleDispose = () => {
@@ -117,7 +117,7 @@ class App extends Component {
     if (!state.browserCheckPassed) {
       return <Screensaver icon="../icons/error.svg" message={"You  must be on a mobile or tablet device to continue to Novastack.app"} />
     } else if (state.isReadyForStreaming) {
-      return <AugmentedStream onDispose={this.handleDispose} stream={this.stream} choosedModelId={state.choosedModelId} />
+      return <AugmentedStream onDispose={this.handleDispose} stream={this.stream} choosedModelConfig={state.choosedModelConfig} />
     } if (state.isWaitingForModel) {
       return <ModelMenu models={models} onModelChoose={this.handleModelChoose} />;
     } if (state.isWaitingForDevice) {

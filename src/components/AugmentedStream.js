@@ -190,7 +190,22 @@ class AugmentedStream extends Component {
     isStreaming: false
   }
 
+  loadModel = async () => {
+    const { choosedModelConfig } = this.props;
+
+    return new Promise((resolve, reject) => {
+      gltfLoader.load(choosedModelConfig.path, gltf => {
+        this.setState({
+          isModelLoading: false
+        });
+        resolve(gltf);
+      }, this.handleModelLoading, reject);
+    });
+  }
+
   init = async () => {
+    const model = await this.loadModel();
+
     if (!onProcess) {
       initEmscriptenFunctions();
     }
@@ -203,9 +218,8 @@ class AugmentedStream extends Component {
 
     pmremGenerator.dispose();
 
-    modelScene.onModelLoading = this.handleModelLoading;
-    modelScene.onReady = this.handleModelReady;
-    modelScene.init(gltfLoader, renderer, envTexture);
+    modelScene = new CommonGltfScene(this.props.choosedModelConfig);
+    modelScene.init(model, renderer, envTexture);
   }
 
   capture = () => {
@@ -261,16 +275,7 @@ class AugmentedStream extends Component {
     this.setState(newState)
   }
 
-  handleModelReady = () => {
-    this.setState({
-      isModelLoading: false
-    })
-  }
-
   componentDidMount = () => {
-    const choosedModelConfig = modelsConfig.filter(m => m.id === this.props.choosedModelId).shift();
-    modelScene = new CommonGltfScene(choosedModelConfig);
-
     video.srcObject = this.props.stream;
     video.onloadedmetadata = () => {
       frameCaptureCanvas.width = video.videoWidth;
