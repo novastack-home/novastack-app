@@ -14,15 +14,24 @@ import ProgressBar from './ProgressBar'
 import Container from './Container'
 
 import {modelsConfig} from '../models-config'
-
 import CommonGltfScene from '../scenes/CommonGltf'
 
-var onProcess, addMarker, finalizeMarkers;
-
-var wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture,
-    imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader;
-
-var requestedFrameId;
+var onProcess,
+    wasmModule,
+    modelScene,
+    camera,
+    cameraControls,
+    cameraScale, 
+    renderer, 
+    envTexture,
+    imageWidth, 
+    imageHeight, 
+    bufferSize, 
+    onProcess, 
+    clock, 
+    pmremGenerator, 
+    gltfLoader,
+    requestedFrameId;
 
 // This is virtual canvas element that used for capture video frames
 let frameCaptureCanvas = document.getElementById('captureCanvas');
@@ -55,51 +64,6 @@ function setCamera(par) {
   camera.up.set(par[7], par[8], par[9]);
 }
 
-function addMarkerFromImg(wasmModule, addMarker, markerData, width, height) {
-  console.log('Load Marker');
-  let bufferSizeMarker = width * height * 4;
-
-  let markerBuf = wasmModule._malloc(bufferSizeMarker);
-  wasmModule.HEAPU8.set(markerData.data, markerBuf);
-
-  addMarker(markerBuf, width, height);
-  wasmModule._free(markerBuf);
-  wasmModule._free(markerData);
-}
-
-async function addMarkers(wasmModule, addMarker, finalizeMarkers) {
-  const markersFolderPath = './images/ar_markers/';
-  const nmarkers = 6;
-  const markersLoading = [];
-
-  // Virtual canvas element for capture image data from img
-  const canvasImg = document.createElement('canvas');
-  const contextImg = canvasImg.getContext('2d');
-
-  for (let i = 1; i <= nmarkers; i++) {
-    let imagePath = `${markersFolderPath}M${i}.png`;
-    let img = new Image();
-    img.src = imagePath;
-    markersLoading.push(new Promise(resolve => {
-      img.onload = () => {
-        resolve(img);
-      }
-    }));
-  }
-
-  const loadedMarkers = await Promise.all(markersLoading)
-
-  loadedMarkers.forEach(img => {
-    canvasImg.width = img.width;
-    canvasImg.height = img.height;
-    contextImg.drawImage(img, 0, 0);
-    const markerData = contextImg.getImageData(0, 0, img.width, img.height);
-    addMarkerFromImg(wasmModule, addMarker, markerData, img.width, img.height);
-  });
-
-  finalizeMarkers();
-};
-
 function calculateCameraScale() {
   let videoAspectRatio = video.videoWidth / video.videoHeight;
   let videoPixelHeight = canvasOutput.offsetWidth / videoAspectRatio;
@@ -111,12 +75,12 @@ function calculateCameraScale() {
   }
 }
 
-async function initEmscriptenFunctions() {
+function initEmscriptenFunctions() {
   // Prepare Emscripten functions
   const onInitDef = wasmModule.cwrap('onInitDef', null, ['number', 'number', 'number']);
-  addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
+  const addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
+  const finalizeMarkers = wasmModule.cwrap('finalizeMarkers', null);
   onProcess = wasmModule.cwrap('onProcess', 'number', ['number', 'number', 'number', 'number']);
-  finalizeMarkers = wasmModule.cwrap('finalizeMarkers', null);
 
   // Prepare space for initial frame and result image{cv}
   // It will be rewritten everytime - you do not need to free memory in the loop
@@ -141,7 +105,25 @@ async function initEmscriptenFunctions() {
 
   // Add marker-images that should be detected on the frame
   // When all markers are added, we call 'finalize' function to prepare right id for markers.
-  await addMarkers(wasmModule, addMarker, finalizeMarkers);
+  let canvasImg = document.createElement('canvas');
+  let contextImg = canvasImg.getContext('2d');
+  let markers = document.querySelectorAll('img[id*="img"]');
+
+  for (let i = 0; i < markers.length; i++) {
+    const img = markers[i];
+    canvasImg.width = img.width;
+    canvasImg.height = img.height;
+    contextImg.drawImage(img, 0, 0);
+    const markerData = contextImg.getImageData(0, 0, img.width, img.height);
+    let bufferSizeMarker = img.width * img.height * 4;
+    let markerBuf = wasmModule._malloc(bufferSizeMarker);
+    wasmModule.HEAPU8.set(markerData.data, markerBuf);
+    addMarker(markerBuf, img.width, img.height);
+    wasmModule._free(markerBuf);
+    wasmModule._free(markerData);
+  }
+  finalizeMarkers();
+  canvasImg = undefined;
 }
 
 async function loadEnvironmentTexture() {
@@ -209,8 +191,8 @@ class AugmentedStream extends Component {
   }
 
   init = async () => {
-    if (!onProcess && !addMarker) {
-      await initEmscriptenFunctions();
+    if (!onProcess) {
+      initEmscriptenFunctions();
     }
 
     calculateCameraScale();
