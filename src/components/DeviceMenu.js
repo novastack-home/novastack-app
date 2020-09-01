@@ -22,11 +22,7 @@ class DeviceMenu extends Component {
         </Button>
       });
       this.setState({devices})
-    })
-    .then(() => {
-      // Stop streaming after getting device id's
-      this.props.stream.getTracks().forEach(t => t.stop());
-    })
+    });
   }
 
   render() {
