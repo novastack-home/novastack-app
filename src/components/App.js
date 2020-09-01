@@ -11,7 +11,8 @@ const initialState = {
   isWaitingCamera: false,
   isWaitingForDevice: false,
   isWaitingForModel: false,
-  isReadyForStreaming: false
+  isReadyForStreaming: false,
+  browserCheckPassed: true,
 }
 
 class App extends Component {
@@ -19,53 +20,53 @@ class App extends Component {
   stream = null
 
   componentDidMount = () => {
-    // Check borwswer compatibility
-    let check = this.checkBrowser();
-    if (check) {
-      this.setState({browserCheckPassed: true});
-    } else {
-      this.setState({browserCheckPassed: false});
+    // Some ads blockers can disable access to media device api. We should check if it possible to request media device
+    if (!navigator.mediaDevices.getUserMedia) {
+      this.setState({
+        ...initialState,
+        error: `Can't request device camera. Please, disable ad blocker or try to update your browser.`
+      });
+
       return;
     }
 
-    /*
-    * Request access to media devices and get device list for allow user choose the device
-    */
-    this.setState({isWaitingCamera: true})
+    // Check browswer compatibility
+    let browserCheckPassed = this.checkBrowserUserAgent();
+
+    this.setState({browserCheckPassed});
+
+    // Do not request media device if browser check failed
+    if (!browserCheckPassed) return;
+
+    // Request access to media devices and get device list for allow user choose the device
+    this.setState({isWaitingCamera: true});
 
     navigator.mediaDevices.getUserMedia({ audio: false, video: true })
       .then((stream) => {
-        this.stream = stream
+        this.stream = stream;
         this.setState({...initialState, isWaitingForDevice: true})
       })
-      .catch(() => {
-        this.setState({
-          ...initialState,
-          error: "Can't get access to your web-camera, please check its connection and reload this page."
-        })
-      });
+      .catch(this.handleMediaDeviceError);
   }
 
-  /*
-  * Invokes when user choose camera
-  */
+  /**
+   * Invokes when user choose camera
+   */
   handleDeviceChoose = (deviceId) => {
+    // Stop all running tracks to start new tracks from choosed device
+    this.stream.getTracks().forEach(track => track.stop());
+
     navigator.mediaDevices.getUserMedia({ audio: false, video: { deviceId } })
       .then(stream => {
         this.stream = stream
         this.setState({...initialState, isWaitingForModel: true})
       })
-      .catch(() => {
-        this.setState({
-          ...initialState,
-          error: "Can't get access to your web-camera, please check its connection and reload this page."
-        })
-      })
+      .catch(this.handleMediaDeviceError)
   }
 
-  /*
-  * Invokes when user choose model
-  */
+  /**
+   * Invokes when user choose model
+   */
   handleModelChoose = (choosedModelId) => {
     this.setState({...initialState, isReadyForStreaming: true, choosedModelId});
   }
@@ -77,11 +78,21 @@ class App extends Component {
     })
   }
 
-  checkBrowser = () => {
+  handleMediaDeviceError = () => {
+    this.setState({
+      ...initialState,
+      error: "Can't get access to your web-camera, please check its connection and reload this page."
+    });
+  }
+
+  /**
+   * checkBrowser() check if app running on smartphone or tablet
+   * returns true if app running on localhost for development and debugging
+   */
+  checkBrowserUserAgent = () => {
     if (
       location.hostname === "localhost"
       || location.hostname === "127.0.0.1"
-      || location.hostname === "nemiop.github.io"
     ) return true;
 
     let check = false;
@@ -101,7 +112,7 @@ class App extends Component {
   }
 
   render = () => {
-    const state = this.state
+    const { state } = this;
 
     if (!state.browserCheckPassed) {
       return <Screensaver icon="../icons/error.svg" message={"You  must be on a mobile or tablet device to continue to Novastack.app"} />
@@ -110,13 +121,13 @@ class App extends Component {
     } if (state.isWaitingForModel) {
       return <ModelMenu models={models} onModelChoose={this.handleModelChoose} />;
     } if (state.isWaitingForDevice) {
-      return <DeviceMenu onDeviceChoose={this.handleDeviceChoose} stream={this.stream} />
+      return <DeviceMenu onDeviceChoose={this.handleDeviceChoose} />
     } if (state.isWaitingCamera) {
       return <Screensaver icon="../icons/camera.svg" message="Please, allow access to your camera." />
     } else if (state.error) {
       return <Screensaver icon="../icons/error.svg" message={state.error} />
     } else {
-      return <Screensaver icon="../icons/trolley.svg" message="Loading." />
+      return <Screensaver icon="../icons/trolley.svg" message="Loading..." />
     }
   }
 }
