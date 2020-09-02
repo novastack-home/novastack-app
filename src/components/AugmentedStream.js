@@ -12,9 +12,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import Stats from 'stats.js'
 import ProgressBar from './ProgressBar'
 import Container from './Container'
-
-import {modelsConfig} from '../models-config'
-import CommonGltfScene from '../scenes/CommonGltf'
+import Scene from '../Scene'
 
 var onProcess,
     wasmModule,
@@ -31,7 +29,8 @@ var onProcess,
     clock, 
     pmremGenerator, 
     gltfLoader,
-    requestedFrameId;
+    requestedFrameId,
+    animationMixer;
 
 // This is virtual canvas element that used for capture video frames
 let frameCaptureCanvas = document.getElementById('captureCanvas');
@@ -89,7 +88,6 @@ function initEmscriptenFunctions() {
 
   canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
   let imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight);
-  // console.log(ImageData);
 
   // Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
   // After using, we need to delete allocated space, it cannot be done automaically.
@@ -104,7 +102,7 @@ function initEmscriptenFunctions() {
   wasmModule._free(imageData);
 
   // Add marker-images that should be detected on the frame
-  // When all markers are added, we call 'finalize' function to prepare right id for markers.
+  // When all markers are added, we call 'finalizeMarkers' function to prepare right id for markers.
   let canvasImg = document.createElement('canvas');
   let contextImg = canvasImg.getContext('2d');
   let markers = document.querySelectorAll('img[id*="img"]');
@@ -153,7 +151,7 @@ function handleWindowResize() {
 // Capture variables
 let imageData, inputBuf2, cam_par = [], result;
 
-// Prepare THREE.js renderer and scene
+// Prepare THREE.js renderer and camera
 const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
 camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
@@ -165,11 +163,14 @@ renderer = new THREE.WebGLRenderer({
   precision: "highp",
   logarithmicDepthBuffer: "auto"
 });
-renderer.physicallyCorrectLights = true;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 renderer.setClearColor(0x000000, 0);
 renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1;
+renderer.physicallyCorrectLights = true;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 pmremGenerator = new THREE.PMREMGenerator( renderer );
 pmremGenerator.compileEquirectangularShader();
@@ -204,7 +205,7 @@ class AugmentedStream extends Component {
   }
 
   init = async () => {
-    const model = await this.loadModel();
+    const gltfModel = await this.loadModel();
 
     if (!onProcess) {
       initEmscriptenFunctions();
@@ -218,8 +219,12 @@ class AugmentedStream extends Component {
 
     pmremGenerator.dispose();
 
-    modelScene = new CommonGltfScene(this.props.choosedModelConfig);
-    modelScene.init(model, renderer, envTexture);
+    // If model has animations create animation mixer to play them
+    animationMixer = new THREE.AnimationMixer(gltfModel.scene);
+    gltfModel.animations.forEach((clip) => animationMixer.clipAction(clip).play());
+
+    modelScene = new Scene(this.props.choosedModelConfig);
+    modelScene.init(gltfModel, envTexture);
   }
 
   capture = () => {
@@ -253,7 +258,7 @@ class AugmentedStream extends Component {
     }
 
     if (modelScene && isStreaming) {
-      modelScene.animate(clock.getDelta());
+      animationMixer.update(clock.getDelta());
     }
 
     wasmModule._free(inputBuf2);

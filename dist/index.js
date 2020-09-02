@@ -83817,58 +83817,7 @@ function Container(props) {
 
 var _default = Container;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js"}],"models-config.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.modelsConfig = void 0;
-const modelsConfig = [{
-  id: 0,
-  name: "Model 1",
-  path: "models/m1/scene.gltf",
-  position: [0.0, -0.5, 0.0],
-  rotation: [0.0, 0.0, 0.0],
-  scale: 0.2
-}, {
-  id: 1,
-  name: "Model 2",
-  path: "models/m2/scene.gltf",
-  position: [0.0, -1.0, 0.0],
-  rotation: [0.0, 1.0, 0.0],
-  scale: 0.005
-}, {
-  id: 2,
-  name: "Model 3",
-  path: "models/m3/scene.gltf",
-  position: [0.0, -1.0, 0.0],
-  rotation: [0.0, 0.0, 0.0],
-  scale: 1.0
-}, {
-  id: 6,
-  name: "Model 4",
-  path: "models/m4/scene.gltf",
-  position: [0.0, -0.7, 0.0],
-  rotation: [0.0, Math.PI, 0.0],
-  scale: 1.0
-}, {
-  id: 4,
-  name: "Model 5",
-  path: "models/m5/scene.gltf",
-  position: [0.0, -0.5, 0.0],
-  rotation: [0.0, 0.0, 0.0],
-  scale: 0.05
-}, {
-  id: 5,
-  name: "Model 6",
-  path: "models/m6/scene.gltf",
-  position: [0.0, 0.0, 0.0],
-  rotation: [0.0, 0.0, 0.0],
-  scale: 0.4
-}];
-exports.modelsConfig = modelsConfig;
-},{}],"scenes/Scene.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js"}],"Scene.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -83876,17 +83825,35 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var THREE = _interopRequireWildcard(require("three"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
 class Scene {
   constructor(modelConfig) {
     this.modelConfig = modelConfig;
-    this.scene = null;
-    this.object = null;
-    this.mixer = null;
   }
 
-  init() {}
-
-  configureRenderer() {}
+  init(gltf, envMap) {
+    let m = this.modelConfig;
+    const model = gltf.scene;
+    this.object = model;
+    model.scale.set(m.scale, m.scale, m.scale);
+    model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
+    model.position.set(m.position[0], m.position[1], m.position[2]);
+    model.traverse(function (node) {
+      if (envMap && node.material && (node.material.isMeshStandardMaterial || node.material.isShaderMaterial && node.material.envMap !== undefined)) {
+        node.material.envMap = envMap;
+        node.material.envMapIntensity = 1.5;
+      }
+    });
+    const modelScene = new THREE.Scene();
+    modelScene.add(model);
+    this.addLights(modelScene);
+    this.scene = modelScene;
+  }
 
   dispose() {
     if (this.object) {
@@ -83922,112 +83889,35 @@ class Scene {
       });
     }
 
-    this.mixer.stopAllAction();
-    this.mixer.uncacheAction();
     this.scene.dispose();
     this.scene = null;
     this.object = null;
-    this.texture = null;
-    this.mixer = null;
   }
 
-  animate(delta) {
-    if (this.mixer !== null) {
-      this.mixer.update(delta);
-    }
+  addLights(scene) {
+    var ambient = new THREE.AmbientLight(0x222222);
+    scene.add(ambient);
+    var directionalLight = new THREE.DirectionalLight(0xdddddd, 4);
+    directionalLight.position.set(0, 0, 1).normalize();
+    scene.add(directionalLight);
+    var spot1 = new THREE.SpotLight(0xffffff, 1);
+    spot1.position.set(5, 10, 5);
+    spot1.angle = 0.50;
+    spot1.penumbra = 0.75;
+    spot1.intensity = 100;
+    spot1.decay = 2;
+    spot1.castShadow = true;
+    spot1.shadow.bias = 0.0001;
+    spot1.shadow.mapSize.width = 2048;
+    spot1.shadow.mapSize.height = 2048;
+    scene.add(spot1);
   }
 
 }
 
 var _default = Scene;
 exports.default = _default;
-},{}],"scenes/CommonGltf.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var THREE = _interopRequireWildcard(require("three"));
-
-var _Scene = _interopRequireDefault(require("./Scene"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-class CommonGltfScene extends _Scene.default {
-  constructor(modelConfig) {
-    super(modelConfig);
-  }
-
-  init(gltf, renderer, envMap) {
-    this.configureRenderer(renderer);
-    let m = this.modelConfig;
-    const model = gltf.scene;
-    this.object = model;
-    model.scale.set(m.scale, m.scale, m.scale);
-    model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
-    model.position.set(m.position[0], m.position[1], m.position[2]);
-    model.traverse(function (node) {
-      if (envMap && node.material && (node.material.isMeshStandardMaterial || node.material.isShaderMaterial && node.material.envMap !== undefined)) {
-        node.material.envMap = envMap;
-        node.material.envMapIntensity = 1.5; // boombox seems too dark otherwise
-      }
-    });
-    const mixer = new THREE.AnimationMixer(model);
-    gltf.animations.forEach(clip => {
-      mixer.clipAction(clip).play();
-    });
-    this.mixer = mixer;
-    const modelScene = new THREE.Scene();
-    modelScene.add(model);
-    addLights(modelScene); // sceneModels.set(m.id, sceneModel);
-    // console.log('Created scene for model', m.path);
-
-    this.scene = modelScene;
-  }
-
-  configureRenderer(renderer) {
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1;
-    renderer.physicallyCorrectLights = true;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  }
-
-}
-
-function addLights(scene) {
-  var ambient = new THREE.AmbientLight(0x222222);
-  scene.add(ambient);
-  var directionalLight = new THREE.DirectionalLight(0xdddddd, 4);
-  directionalLight.position.set(0, 0, 1).normalize();
-  scene.add(directionalLight);
-  var spot1 = new THREE.SpotLight(0xffffff, 1);
-  spot1.position.set(5, 10, 5);
-  spot1.angle = 0.50;
-  spot1.penumbra = 0.75;
-  spot1.intensity = 100;
-  spot1.decay = 2;
-  spot1.castShadow = true;
-  spot1.shadow.bias = 0.0001;
-  spot1.shadow.mapSize.width = 2048;
-  spot1.shadow.mapSize.height = 2048;
-  scene.add(spot1);
-}
-
-function onError(err) {
-  console.error(err);
-}
-
-var _default = CommonGltfScene;
-exports.default = _default;
-},{"three":"../node_modules/three/build/three.module.js","./Scene":"scenes/Scene.js"}],"components/AugmentedStream.js":[function(require,module,exports) {
+},{"three":"../node_modules/three/build/three.module.js"}],"components/AugmentedStream.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84063,9 +83953,7 @@ var _ProgressBar = _interopRequireDefault(require("./ProgressBar"));
 
 var _Container = _interopRequireDefault(require("./Container"));
 
-var _modelsConfig = require("../models-config");
-
-var _CommonGltf = _interopRequireDefault(require("../scenes/CommonGltf"));
+var _Scene = _interopRequireDefault(require("../Scene"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -84075,7 +83963,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var onProcess, wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture, imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader, requestedFrameId; // This is virtual canvas element that used for capture video frames
+var onProcess, wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture, imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader, requestedFrameId, animationMixer; // This is virtual canvas element that used for capture video frames
 
 let frameCaptureCanvas = document.getElementById('captureCanvas');
 let canvasContext = frameCaptureCanvas.getContext('2d'); // This parameters improve performance
@@ -84125,8 +84013,7 @@ function initEmscriptenFunctions() {
   imageWidth = frameCaptureCanvas.width;
   imageHeight = frameCaptureCanvas.height;
   canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-  let imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight); // console.log(ImageData);
-  // Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
+  let imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight); // Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
   // After using, we need to delete allocated space, it cannot be done automaically.
 
   bufferSize = imageWidth * imageHeight * 4;
@@ -84142,7 +84029,7 @@ function initEmscriptenFunctions() {
   wasmModule._free(temp1);
 
   wasmModule._free(imageData); // Add marker-images that should be detected on the frame
-  // When all markers are added, we call 'finalize' function to prepare right id for markers.
+  // When all markers are added, we call 'finalizeMarkers' function to prepare right id for markers.
 
 
   let canvasImg = document.createElement('canvas');
@@ -84196,7 +84083,7 @@ function handleWindowResize() {
 let imageData,
     inputBuf2,
     cam_par = [],
-    result; // Prepare THREE.js renderer and scene
+    result; // Prepare THREE.js renderer and camera
 
 const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
 camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
@@ -84208,12 +84095,14 @@ renderer = new THREE.WebGLRenderer({
   precision: "highp",
   logarithmicDepthBuffer: "auto"
 });
-renderer.physicallyCorrectLights = true;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-
 renderer.setClearColor(0x000000, 0);
 renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1;
+renderer.physicallyCorrectLights = true;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 pmremGenerator = new THREE.PMREMGenerator(renderer);
 pmremGenerator.compileEquirectangularShader();
 window.addEventListener('resize', handleWindowResize);
@@ -84248,7 +84137,7 @@ class AugmentedStream extends _react.Component {
     });
 
     _defineProperty(this, "init", async () => {
-      const model = await this.loadModel();
+      const gltfModel = await this.loadModel();
 
       if (!onProcess) {
         initEmscriptenFunctions();
@@ -84260,9 +84149,12 @@ class AugmentedStream extends _react.Component {
         await loadEnvironmentTexture();
       }
 
-      pmremGenerator.dispose();
-      modelScene = new _CommonGltf.default(this.props.choosedModelConfig);
-      modelScene.init(model, renderer, envTexture);
+      pmremGenerator.dispose(); // If model has animations create animation mixer to play them
+
+      animationMixer = new THREE.AnimationMixer(gltfModel.scene);
+      gltfModel.animations.forEach(clip => animationMixer.clipAction(clip).play());
+      modelScene = new _Scene.default(this.props.choosedModelConfig);
+      modelScene.init(gltfModel, envTexture);
     });
 
     _defineProperty(this, "capture", () => {
@@ -84298,7 +84190,7 @@ class AugmentedStream extends _react.Component {
       }
 
       if (modelScene && isStreaming) {
-        modelScene.animate(clock.getDelta());
+        animationMixer.update(clock.getDelta());
       }
 
       wasmModule._free(inputBuf2);
@@ -84401,7 +84293,7 @@ const LoadingProgressOverlay = props => /*#__PURE__*/_react.default.createElemen
 
 var _default = AugmentedStream;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js","@material-ui/core/AppBar":"../node_modules/@material-ui/core/esm/AppBar/index.js","@material-ui/core/Toolbar":"../node_modules/@material-ui/core/esm/Toolbar/index.js","@material-ui/core/Typography":"../node_modules/@material-ui/core/esm/Typography/index.js","@material-ui/core/Button":"../node_modules/@material-ui/core/esm/Button/index.js","@material-ui/core/IconButton":"../node_modules/@material-ui/core/esm/IconButton/index.js","@material-ui/icons/Menu":"../node_modules/@material-ui/icons/Menu.js","three":"../node_modules/three/build/three.module.js","three/examples/jsm/controls/OrbitControls":"../node_modules/three/examples/jsm/controls/OrbitControls.js","three/examples/jsm/loaders/RGBELoader.js":"../node_modules/three/examples/jsm/loaders/RGBELoader.js","three/examples/jsm/loaders/GLTFLoader.js":"../node_modules/three/examples/jsm/loaders/GLTFLoader.js","stats.js":"../node_modules/stats.js/build/stats.min.js","./ProgressBar":"components/ProgressBar.js","./Container":"components/Container.js","../models-config":"models-config.js","../scenes/CommonGltf":"scenes/CommonGltf.js"}],"components/Screensaver.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","@material-ui/core/AppBar":"../node_modules/@material-ui/core/esm/AppBar/index.js","@material-ui/core/Toolbar":"../node_modules/@material-ui/core/esm/Toolbar/index.js","@material-ui/core/Typography":"../node_modules/@material-ui/core/esm/Typography/index.js","@material-ui/core/Button":"../node_modules/@material-ui/core/esm/Button/index.js","@material-ui/core/IconButton":"../node_modules/@material-ui/core/esm/IconButton/index.js","@material-ui/icons/Menu":"../node_modules/@material-ui/icons/Menu.js","three":"../node_modules/three/build/three.module.js","three/examples/jsm/controls/OrbitControls":"../node_modules/three/examples/jsm/controls/OrbitControls.js","three/examples/jsm/loaders/RGBELoader.js":"../node_modules/three/examples/jsm/loaders/RGBELoader.js","three/examples/jsm/loaders/GLTFLoader.js":"../node_modules/three/examples/jsm/loaders/GLTFLoader.js","stats.js":"../node_modules/stats.js/build/stats.min.js","./ProgressBar":"components/ProgressBar.js","./Container":"components/Container.js","../Scene":"Scene.js"}],"components/Screensaver.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -84533,7 +84425,58 @@ class ModelMenu extends _react.Component {
 
 var _default = ModelMenu;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js","./Container":"components/Container.js","@material-ui/core/Button":"../node_modules/@material-ui/core/esm/Button/index.js"}],"components/App.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","./Container":"components/Container.js","@material-ui/core/Button":"../node_modules/@material-ui/core/esm/Button/index.js"}],"models-config.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.modelsConfig = void 0;
+const modelsConfig = [{
+  id: 0,
+  name: "Model 1",
+  path: "models/m1/scene.gltf",
+  position: [0.0, -0.5, 0.0],
+  rotation: [0.0, 0.0, 0.0],
+  scale: 0.2
+}, {
+  id: 1,
+  name: "Model 2",
+  path: "models/m2/scene.gltf",
+  position: [0.0, -1.0, 0.0],
+  rotation: [0.0, 1.0, 0.0],
+  scale: 0.005
+}, {
+  id: 2,
+  name: "Model 3",
+  path: "models/m3/scene.gltf",
+  position: [0.0, -1.0, 0.0],
+  rotation: [0.0, 0.0, 0.0],
+  scale: 1.0
+}, {
+  id: 6,
+  name: "Model 4",
+  path: "models/m4/scene.gltf",
+  position: [0.0, -0.7, 0.0],
+  rotation: [0.0, Math.PI, 0.0],
+  scale: 1.0
+}, {
+  id: 4,
+  name: "Model 5",
+  path: "models/m5/scene.gltf",
+  position: [0.0, -0.5, 0.0],
+  rotation: [0.0, 0.0, 0.0],
+  scale: 0.05
+}, {
+  id: 5,
+  name: "Model 6",
+  path: "models/m6/scene.gltf",
+  position: [0.0, 0.0, 0.0],
+  rotation: [0.0, 0.0, 0.0],
+  scale: 0.4
+}];
+exports.modelsConfig = modelsConfig;
+},{}],"components/App.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
