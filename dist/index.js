@@ -83990,6 +83990,11 @@ function setCamera(par) {
   camera.lookAt(par[4], par[5], par[6]);
   camera.up.set(par[7], par[8], par[9]);
 }
+/**
+ * calculateCameraScale() sets multiplier for camera parameters
+ * it used for correctly overlap threejs canvas above video when they have different dimensions
+ */
+
 
 function calculateCameraScale() {
   let videoAspectRatio = video.videoWidth / video.videoHeight;
@@ -84002,7 +84007,7 @@ function calculateCameraScale() {
   }
 }
 
-function initEmscriptenFunctions() {
+function initEmscriptenFunctionsAndMarkers() {
   // Prepare Emscripten functions
   const onInitDef = wasmModule.cwrap('onInitDef', null, ['number', 'number', 'number']);
   const addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
@@ -84137,7 +84142,7 @@ class AugmentedStream extends _react.Component {
       const gltfModel = await this.loadModel();
 
       if (!onProcess) {
-        initEmscriptenFunctions();
+        initEmscriptenFunctionsAndMarkers();
       }
 
       calculateCameraScale();
@@ -84161,12 +84166,12 @@ class AugmentedStream extends _react.Component {
         isStreaming
       } = this.state;
       let imageData; // Get new image data if user is not exploring model or image data not initialized
-      // Else pass saved image data
 
       if (!isExploring || !imageData) {
         canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
         imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
-      }
+      } // Send image data to computer vision and get new parameters for camera
+
 
       if (isStreaming && !isExploring) {
         let inputBuf2 = wasmModule._malloc(bufferSize);
@@ -84183,17 +84188,18 @@ class AugmentedStream extends _react.Component {
         wasmModule._free(inputBuf2);
 
         wasmModule._free(result);
-      }
+      } // If model scene is ready render it and play animations
 
-      if (modelScene && modelScene.scene && cameraParameters[0] >= 0) {
-        !isExploring && setCamera(cameraParameters);
-        renderer.render(modelScene.scene, camera);
-      } else {
-        renderer.clear();
-      }
 
-      if (modelScene && isStreaming) {
-        animationMixer.update(clock.getDelta());
+      if (modelScene && modelScene.scene) {
+        if (cameraParameters[0] >= 0) {
+          !isExploring && setCamera(cameraParameters);
+          renderer.render(modelScene.scene, camera);
+        } else renderer.clear();
+
+        if (isStreaming) {
+          animationMixer.update(clock.getDelta());
+        }
       }
 
       cameraControls.update();
