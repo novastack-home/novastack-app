@@ -130,7 +130,7 @@ async function loadEnvironmentTexture() {
   return new Promise((resolve, reject) => {
     let rgbeLoader = new RGBELoader()
       .setDataType( THREE.UnsignedByteType )
-      .setPath( '../../textures/equirectangular/' )
+      .setPath( '../../textures/' )
 
     rgbeLoader.load( 'venice_sunset_1k.hdr', texture => {
       envTexture = pmremGenerator.fromEquirectangular( texture ).texture;

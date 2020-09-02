@@ -84173,7 +84173,7 @@ function initEmscriptenFunctions() {
 
 async function loadEnvironmentTexture() {
   return new Promise((resolve, reject) => {
-    let rgbeLoader = new _RGBELoader.RGBELoader().setDataType(THREE.UnsignedByteType).setPath('../../textures/equirectangular/');
+    let rgbeLoader = new _RGBELoader.RGBELoader().setDataType(THREE.UnsignedByteType).setPath('../../textures/');
     rgbeLoader.load('venice_sunset_1k.hdr', texture => {
       envTexture = pmremGenerator.fromEquirectangular(texture).texture;
       resolve(envTexture);
@@ -84750,7 +84750,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50142" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49817" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
