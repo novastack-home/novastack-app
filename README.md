@@ -22,8 +22,6 @@ To speed up loading and parsing of JS code, it is better to use only a single fi
 
 `src/components/AugmentedStream.js` contains main logic: gets video stream from devices, loads of markers, works with WASM functions to process frames and shows models over the frame.
 
-`src/scenes` folder consists a few files to load or create ThreeJS scenes.
-
 
 If you want to change something in code, you should edit any of these 3 files, we do not recommend to change `dist/index.js` directly. This file should be built by modules bundler using instructions below in the section `Save changes and build bundle`.
 
@@ -59,7 +57,7 @@ To add a new marker you need to modify `index.html` and `index.js` files:
 
 ### Change environment texture
 To change texture that will be used as environment map you need to modify `loadEnvironmentTexture` function at `src/components/AugmentedStream.js`.
-Textures are stored in `textures/equirectangular` folder. Change first argument of `rgbeLoader.load` to load another texture.
+Textures are stored in `textures/` folder. Change first argument of `rgbeLoader.load` to load another texture.
 
 
 ### Save changes and build bundle
@@ -85,4 +83,11 @@ npm start
 This command will only rebuild bundle:
 ```
 npm run build
+```
+
+
+#### Code style
+Run code linter to check for code style issues
+```
+npm run lint
 ```

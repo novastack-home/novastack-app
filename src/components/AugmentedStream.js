@@ -1,41 +1,39 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import Stats from 'stats.js'
-import ProgressBar from './ProgressBar'
-import Container from './Container'
-
-import {modelsConfig} from '../models-config'
-import CommonGltfScene from '../scenes/CommonGltf'
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import Stats from 'stats.js';
+import ProgressBar from './ProgressBar';
+import Container from './Container';
+import Scene from '../Scene';
 
 var onProcess,
-    wasmModule,
-    modelScene,
-    camera,
-    cameraControls,
-    cameraScale, 
-    renderer, 
-    envTexture,
-    imageWidth, 
-    imageHeight, 
-    bufferSize, 
-    onProcess, 
-    clock, 
-    pmremGenerator, 
-    gltfLoader,
-    requestedFrameId;
+  wasmModule,
+  modelScene,
+  camera,
+  cameraControls,
+  cameraScale,
+  renderer,
+  envMap,
+  imageWidth,
+  imageHeight,
+  bufferSize,
+  clock,
+  pmremGenerator,
+  gltfLoader,
+  requestedFrameId,
+  animationMixer;
 
-// This is virtual canvas element that used for capture video frames
-let frameCaptureCanvas = document.getElementById('captureCanvas');
-let canvasContext = frameCaptureCanvas.getContext('2d');
+// This canvas element that used for capture video frames
+const frameCaptureCanvas = document.getElementById('captureCanvas');
+const canvasContext = frameCaptureCanvas.getContext('2d');
 // This parameters improve performance
 canvasContext.imageSmoothingEnabled = false;
 canvasContext.globalCompositeOperation = 'copy';
@@ -47,26 +45,30 @@ gltfLoader = new GLTFLoader();
 
 // Configure metrics
 const statsFPS = new Stats();
-statsFPS.dom.style.top = '64px'
+statsFPS.dom.style.top = '64px';
 statsFPS.showPanel(0);
 // document.body.appendChild(statsFPS.dom);
 
 window.Module = {
   onRuntimeInitialized: () => {
-    wasmModule = window.Module
+    wasmModule = window.Module;
   },
 };
 
 function setCamera(par) {
-  let k = cameraScale;
-  camera.position.set(par[1]*k, par[2]*k, par[3]*k);
+  const k = cameraScale;
+  camera.position.set(par[1] * k, par[2] * k, par[3] * k);
   camera.lookAt(par[4], par[5], par[6]);
   camera.up.set(par[7], par[8], par[9]);
 }
 
+/**
+ * calculateCameraScale() sets multiplier for camera parameters
+ * it used for correctly overlap threejs canvas above video when they have different dimensions
+ */
 function calculateCameraScale() {
-  let videoAspectRatio = video.videoWidth / video.videoHeight;
-  let videoPixelHeight = canvasOutput.offsetWidth / videoAspectRatio;
+  const videoAspectRatio = video.videoWidth / video.videoHeight;
+  const videoPixelHeight = canvasOutput.offsetWidth / videoAspectRatio;
   // let videoPixelWidth = window.innerHeight * videoAspectRatio;
   if (videoPixelHeight < canvasOutput.offsetHeight) {
     cameraScale = canvasOutput.offsetHeight / videoPixelHeight;
@@ -75,7 +77,7 @@ function calculateCameraScale() {
   }
 }
 
-function initEmscriptenFunctions() {
+function initEmscriptenFunctionsAndMarkers() {
   // Prepare Emscripten functions
   const onInitDef = wasmModule.cwrap('onInitDef', null, ['number', 'number', 'number']);
   const addMarker = wasmModule.cwrap('addMarker', null, ['number', 'number', 'number']);
@@ -88,14 +90,13 @@ function initEmscriptenFunctions() {
   imageHeight = frameCaptureCanvas.height;
 
   canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-  let imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight);
-  // console.log(ImageData);
+  const imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight);
 
   // Initialize engine in Emscipten code. It get a 'pointer' to the image and works with it
   // After using, we need to delete allocated space, it cannot be done automaically.
   bufferSize = imageWidth * imageHeight * 4;
-  let inputBuf = wasmModule._malloc(bufferSize);
-  let temp1 = new Uint8ClampedArray(wasmModule.HEAPU8.buffer, inputBuf, bufferSize);
+  const inputBuf = wasmModule._malloc(bufferSize);
+  const temp1 = new Uint8ClampedArray(wasmModule.HEAPU8.buffer, inputBuf, bufferSize);
   temp1.set(imageData.data, 0);
 
   onInitDef(inputBuf, imageWidth, imageHeight);
@@ -104,10 +105,10 @@ function initEmscriptenFunctions() {
   wasmModule._free(imageData);
 
   // Add marker-images that should be detected on the frame
-  // When all markers are added, we call 'finalize' function to prepare right id for markers.
+  // When all markers are added, we call 'finalizeMarkers' function to prepare right id for markers.
   let canvasImg = document.createElement('canvas');
-  let contextImg = canvasImg.getContext('2d');
-  let markers = document.querySelectorAll('img[id*="img"]');
+  const contextImg = canvasImg.getContext('2d');
+  const markers = document.querySelectorAll('img[id*="img"]');
 
   for (let i = 0; i < markers.length; i++) {
     const img = markers[i];
@@ -115,8 +116,8 @@ function initEmscriptenFunctions() {
     canvasImg.height = img.height;
     contextImg.drawImage(img, 0, 0);
     const markerData = contextImg.getImageData(0, 0, img.width, img.height);
-    let bufferSizeMarker = img.width * img.height * 4;
-    let markerBuf = wasmModule._malloc(bufferSizeMarker);
+    const bufferSizeMarker = img.width * img.height * 4;
+    const markerBuf = wasmModule._malloc(bufferSizeMarker);
     wasmModule.HEAPU8.set(markerData.data, markerBuf);
     addMarker(markerBuf, img.width, img.height);
     wasmModule._free(markerBuf);
@@ -128,15 +129,16 @@ function initEmscriptenFunctions() {
 
 async function loadEnvironmentTexture() {
   return new Promise((resolve, reject) => {
-    let rgbeLoader = new RGBELoader()
-      .setDataType( THREE.UnsignedByteType )
-      .setPath( '../../textures/equirectangular/' )
+    const rgbeLoader = new RGBELoader()
+      .setDataType(THREE.UnsignedByteType)
+      .setPath('/textures/');
 
-    rgbeLoader.load( 'venice_sunset_1k.hdr', texture => {
-      envTexture = pmremGenerator.fromEquirectangular( texture ).texture;
-      resolve(envTexture);
-    }, () => {}, reject)
-  })
+    rgbeLoader.load('venice_sunset_1k.hdr', (texture) => {
+      envMap = pmremGenerator.fromEquirectangular(texture).texture;
+      pmremGenerator.dispose();
+      resolve(envMap);
+    }, () => {}, reject);
+  });
 }
 
 function handleWindowResize() {
@@ -146,14 +148,12 @@ function handleWindowResize() {
     camera.updateProjectionMatrix();
     calculateCameraScale();
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e);
   }
 }
 
-// Capture variables
-let imageData, inputBuf2, cam_par = [], result;
-
-// Prepare THREE.js renderer and scene
+// Prepare THREE.js renderer and camera
 const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
 camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
 
@@ -161,116 +161,131 @@ renderer = new THREE.WebGLRenderer({
   canvas: canvasOutput,
   antialias: true,
   alpha: true,
-  powerPreference: "high-performance",
-  precision: "highp",
-  logarithmicDepthBuffer: "auto"
+  powerPreference: 'high-performance',
+  precision: 'highp',
+  logarithmicDepthBuffer: 'auto',
 });
-renderer.physicallyCorrectLights = true;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 renderer.setClearColor(0x000000, 0);
 renderer.setSize(canvasOutput.offsetWidth, canvasOutput.offsetHeight, false);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1;
+renderer.physicallyCorrectLights = true;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-pmremGenerator = new THREE.PMREMGenerator( renderer );
+pmremGenerator = new THREE.PMREMGenerator(renderer);
 pmremGenerator.compileEquirectangularShader();
 
 window.addEventListener('resize', handleWindowResize);
 
-cameraControls = new OrbitControls( camera, renderer.domElement );
+cameraControls = new OrbitControls(camera, renderer.domElement);
 cameraControls.enableDamping = true;
 cameraControls.dampingFactor = 0.05;
 cameraControls.rotateSpeed = 0.87;
 
 clock = new THREE.Clock();
 
+// This variable will store camera parameters recieved from computer vision module
+let cameraParameters = [];
+
 class AugmentedStream extends Component {
   state = {
     isModelLoading: true,
     isExploring: false,
-    isStreaming: false
+    isStreaming: false,
+  }
+
+  loadModel = async () => {
+    const { choosedModelConfig } = this.props;
+
+    return new Promise((resolve, reject) => {
+      gltfLoader.load(choosedModelConfig.path, (gltf) => {
+        this.setState({
+          isModelLoading: false,
+        });
+        resolve(gltf);
+      }, this.handleModelLoading, reject);
+    });
   }
 
   init = async () => {
+    const gltfModel = await this.loadModel();
+
     if (!onProcess) {
-      initEmscriptenFunctions();
+      initEmscriptenFunctionsAndMarkers();
+    }
+
+    if (!envMap) {
+      envMap = await loadEnvironmentTexture();
     }
 
     calculateCameraScale();
 
-    if (!envTexture) {
-      await loadEnvironmentTexture();
-    }
+    // If model has animations create animation mixer to play them
+    animationMixer = new THREE.AnimationMixer(gltfModel.scene);
+    gltfModel.animations.forEach((clip) => animationMixer.clipAction(clip).play());
 
-    pmremGenerator.dispose();
-
-    modelScene.onModelLoading = this.handleModelLoading;
-    modelScene.onReady = this.handleModelReady;
-    modelScene.init(gltfLoader, renderer, envTexture);
+    modelScene = new Scene(this.props.choosedModelConfig);
+    modelScene.init(gltfModel, envMap);
   }
 
   capture = () => {
-    statsFPS.begin()
+    statsFPS.begin();
 
-    const {isExploring, isStreaming} = this.state;
+    const { isExploring, isStreaming } = this.state;
 
+    let imageData;
     // Get new image data if user is not exploring model or image data not initialized
-    // Else pass saved image data
     if (!isExploring || !imageData) {
-        canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
-        imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
+      canvasContext.drawImage(video, 0, 0, imageWidth, imageHeight);
+      imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
     }
 
-    if (isStreaming) {
-      inputBuf2 = wasmModule._malloc(bufferSize);
+    // Send image data to computer vision and get new parameters for camera
+    if (isStreaming && !isExploring) {
+      const inputBuf2 = wasmModule._malloc(bufferSize);
       wasmModule.HEAPU8.set(imageData, inputBuf2);
-      result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
-      cam_par = []
+      const result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
+      cameraParameters = [];
       // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
       for (let v = 0; v < 10; v++) {
-        cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
+        // eslint-disable-next-line no-undef
+        cameraParameters.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
+      }
+      wasmModule._free(inputBuf2);
+      wasmModule._free(result);
+    }
+
+    // If model scene is ready render it and play animations
+    if (modelScene && modelScene.scene) {
+      if (cameraParameters[0] >= 0) {
+        if (!isExploring) setCamera(cameraParameters);
+        renderer.render(modelScene.scene, camera);
+      } else renderer.clear();
+
+      if (isStreaming) {
+        animationMixer.update(clock.getDelta());
       }
     }
 
-    if (modelScene && modelScene.scene && cam_par[0] >= 0) {
-      !isExploring && setCamera(cam_par);
-      renderer.render(modelScene.scene, camera);
-    } else {
-      renderer.clear();
-    }
-
-    if (modelScene && isStreaming) {
-      modelScene.animate(clock.getDelta());
-    }
-
-    wasmModule._free(inputBuf2);
-    wasmModule._free(result);
-
     cameraControls.update();
 
-    statsFPS.end()
+    statsFPS.end();
 
     requestAnimationFrame(this.capture);
   }
 
   handleModelLoading = (xhr) => {
-    let newState = { isModelLoading: true }
-    if ( xhr.lengthComputable ) {
-  		var percentComplete = xhr.loaded / xhr.total * 100;
-      newState.modelLoadingProgress = Math.round(percentComplete)
-  	}
-    this.setState(newState)
-  }
-
-  handleModelReady = () => {
-    this.setState({
-      isModelLoading: false
-    })
+    const newState = { isModelLoading: true };
+    if (xhr.lengthComputable) {
+      var percentComplete = (xhr.loaded / xhr.total) * 100;
+      newState.modelLoadingProgress = Math.round(percentComplete);
+    }
+    this.setState(newState);
   }
 
   componentDidMount = () => {
-    const choosedModelConfig = modelsConfig.filter(m => m.id === this.props.choosedModelId).shift();
-    modelScene = new CommonGltfScene(choosedModelConfig);
-
     video.srcObject = this.props.stream;
     video.onloadedmetadata = () => {
       frameCaptureCanvas.width = video.videoWidth;
@@ -283,7 +298,7 @@ class AugmentedStream extends Component {
 
   dispose = () => {
     this.setState(
-      state => Object.assign(state, {isStreaming: false}),
+      (state) => Object.assign(state, { isStreaming: false }),
       () => {
         cancelAnimationFrame(requestedFrameId);
         modelScene.dispose();
@@ -291,29 +306,29 @@ class AugmentedStream extends Component {
         renderer.renderLists.dispose();
         renderer.dispose();
         modelScene = null;
-        cam_par = [];
+        cameraParameters = [];
         canvasContext.clearRect(0, 0, frameCaptureCanvas.width, frameCaptureCanvas.height);
-      }
+      },
     );
   }
 
   explore = () => {
-    this.setState(state => Object.assign(state, {isExploring: !state.isExploring}))
+    this.setState((state) => Object.assign(state, { isExploring: !state.isExploring }));
   }
 
   scanOrPause = () => {
-      if (this.state.isStreaming) {
-        this.setState(state => Object.assign(state, {isStreaming: false}))
-      } else {
-        this.setState(
-          state => Object.assign(state, {isStreaming: true}),
-          () => this.capture()
-        )
-      }
+    if (this.state.isStreaming) {
+      this.setState((state) => Object.assign(state, { isStreaming: false }));
+    } else {
+      this.setState(
+        (state) => Object.assign(state, { isStreaming: true }),
+        () => this.capture(),
+      );
+    }
   }
 
-  render = () => {
-    return <div>
+  render = () => (
+    <div>
       {this.state.isModelLoading
         ? <LoadingProgressOverlay progress={this.state.modelLoadingProgress} />
         : <React.Fragment>
@@ -323,14 +338,14 @@ class AugmentedStream extends Component {
                 <MenuIcon />
               </IconButton>
               <Button onClick={this.dispose} color="inherit">Dispose</Button>
-              <Button onClick={this.explore} color={this.state.isExploring ? "secondary" : "inherit"}>Explore</Button>
+              <Button onClick={this.explore} color={this.state.isExploring ? 'secondary' : 'inherit'}>Explore</Button>
               <Button onClick={this.scanOrPause} color="inherit">{this.state.isStreaming ? 'Pause' : 'Scan'}</Button>
             </Toolbar>
           </AppBar>
         </React.Fragment>
       }
     </div>
-  }
+  )
 }
 
 const LoadingProgressOverlay = (props) => (
@@ -340,6 +355,6 @@ const LoadingProgressOverlay = (props) => (
       {props.progress && <ProgressBar value={props.progress} />}
     </Container>
   </div>
-)
+);
 
-export default AugmentedStream
+export default AugmentedStream;

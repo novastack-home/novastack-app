@@ -1,5 +1,5 @@
-import React from 'react'
-import Container from './Container'
+import React from 'react';
+import Container from './Container';
 
 function Screensaver(props) {
   return (
@@ -10,7 +10,7 @@ function Screensaver(props) {
         <div className="screensaver-message">{props.message}</div>
       </div>
     </Container>
-  )
+  );
 }
 
-export default Screensaver
+export default Screensaver;
