@@ -301,6 +301,7 @@ class AugmentedStream extends Component {
       (state) => Object.assign(state, { isStreaming: false }),
       () => {
         cancelAnimationFrame(requestedFrameId);
+        renderer.clear();
         modelScene.dispose();
         this.props.onDispose();
         renderer.renderLists.dispose();
