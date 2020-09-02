@@ -32,7 +32,7 @@ var onProcess,
     requestedFrameId,
     animationMixer;
 
-// This is virtual canvas element that used for capture video frames
+// This canvas element that used for capture video frames
 let frameCaptureCanvas = document.getElementById('captureCanvas');
 let canvasContext = frameCaptureCanvas.getContext('2d');
 // This parameters improve performance
@@ -148,9 +148,6 @@ function handleWindowResize() {
   }
 }
 
-// Capture variables
-let imageData, inputBuf2, cam_par = [], result;
-
 // Prepare THREE.js renderer and camera
 const aspectRatio = canvasOutput.offsetWidth / canvasOutput.offsetHeight;
 camera = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 100);
@@ -183,6 +180,9 @@ cameraControls.dampingFactor = 0.05;
 cameraControls.rotateSpeed = 0.87;
 
 clock = new THREE.Clock();
+
+// This variable will store camera parameters recieved from computer vision module
+let cameraParameters = [];
 
 class AugmentedStream extends Component {
   state = {
@@ -232,6 +232,7 @@ class AugmentedStream extends Component {
 
     const {isExploring, isStreaming} = this.state;
 
+    let imageData;
     // Get new image data if user is not exploring model or image data not initialized
     // Else pass saved image data
     if (!isExploring || !imageData) {
@@ -239,19 +240,21 @@ class AugmentedStream extends Component {
         imageData = canvasContext.getImageData(0, 0, imageWidth, imageHeight).data;
     }
 
-    if (isStreaming) {
-      inputBuf2 = wasmModule._malloc(bufferSize);
+    if (isStreaming && !isExploring) {
+      let inputBuf2 = wasmModule._malloc(bufferSize);
       wasmModule.HEAPU8.set(imageData, inputBuf2);
-      result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
-      cam_par = []
+      let result = onProcess(inputBuf2, imageWidth, imageHeight, 1); // Last parameter is frameNum
+      cameraParameters = []
       // We return array with C++ float type. So we need to get them in JS by using HEAP and memory
       for (let v = 0; v < 10; v++) {
-        cam_par.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
+        cameraParameters.push(Module.HEAPF32[result / Float32Array.BYTES_PER_ELEMENT + v]);
       }
+      wasmModule._free(inputBuf2);
+      wasmModule._free(result);
     }
 
-    if (modelScene && modelScene.scene && cam_par[0] >= 0) {
-      !isExploring && setCamera(cam_par);
+    if (modelScene && modelScene.scene && cameraParameters[0] >= 0) {
+      !isExploring && setCamera(cameraParameters);
       renderer.render(modelScene.scene, camera);
     } else {
       renderer.clear();
@@ -260,9 +263,6 @@ class AugmentedStream extends Component {
     if (modelScene && isStreaming) {
       animationMixer.update(clock.getDelta());
     }
-
-    wasmModule._free(inputBuf2);
-    wasmModule._free(result);
 
     cameraControls.update();
 
@@ -301,7 +301,7 @@ class AugmentedStream extends Component {
         renderer.renderLists.dispose();
         renderer.dispose();
         modelScene = null;
-        cam_par = [];
+        cameraParameters = [];
         canvasContext.clearRect(0, 0, frameCaptureCanvas.width, frameCaptureCanvas.height);
       }
     );
