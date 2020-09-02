@@ -83837,17 +83837,20 @@ class Scene {
   }
 
   init(gltf, envMap) {
-    let m = this.modelConfig;
+    let config = this.modelConfig;
     const model = gltf.scene;
-    this.object = model;
-    model.scale.set(m.scale, m.scale, m.scale);
-    model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
-    model.position.set(m.position[0], m.position[1], m.position[2]);
+    this.model = model;
+    model.scale.set(config.scale, config.scale, config.scale);
+    model.rotation.set(config.rotation[0], config.rotation[1], config.rotation[2]);
+    model.position.set(config.position[0], config.position[1], config.position[2]);
     model.traverse(function (node) {
       if (envMap && node.material && (node.material.isMeshStandardMaterial || node.material.isShaderMaterial && node.material.envMap !== undefined)) {
         node.material.envMap = envMap;
         node.material.envMapIntensity = 1.5;
       }
+    });
+    model.traverse(function (node) {
+      if (node.isMesh || node.isLight) node.castShadow = true;
     });
     const modelScene = new THREE.Scene();
     modelScene.add(model);
@@ -83856,8 +83859,8 @@ class Scene {
   }
 
   dispose() {
-    if (this.object) {
-      this.object.traverse(node => {
+    if (this.model) {
+      this.model.traverse(node => {
         if (node.geometry) {
           node.geometry.dispose();
         }
@@ -83879,6 +83882,7 @@ class Scene {
 
         if (node.material && node.material.envMap && node.material.envMap.dispose) {
           node.material.envMap.dispose();
+          node.material.envMap = undefined;
         }
       });
     }
@@ -83890,8 +83894,8 @@ class Scene {
     }
 
     this.scene.dispose();
-    this.scene = null;
-    this.object = null;
+    this.scene = undefined;
+    this.model = undefined;
   }
 
   addLights(scene) {
@@ -83963,7 +83967,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var onProcess, wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envTexture, imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader, requestedFrameId, animationMixer; // This canvas element that used for capture video frames
+var onProcess, wasmModule, modelScene, camera, cameraControls, cameraScale, renderer, envMap, imageWidth, imageHeight, bufferSize, onProcess, clock, pmremGenerator, gltfLoader, requestedFrameId, animationMixer; // This canvas element that used for capture video frames
 
 let frameCaptureCanvas = document.getElementById('captureCanvas');
 let canvasContext = frameCaptureCanvas.getContext('2d'); // This parameters improve performance
@@ -84065,10 +84069,11 @@ function initEmscriptenFunctionsAndMarkers() {
 
 async function loadEnvironmentTexture() {
   return new Promise((resolve, reject) => {
-    let rgbeLoader = new _RGBELoader.RGBELoader().setDataType(THREE.UnsignedByteType).setPath('../../textures/');
+    let rgbeLoader = new _RGBELoader.RGBELoader().setDataType(THREE.UnsignedByteType).setPath('/textures/');
     rgbeLoader.load('venice_sunset_1k.hdr', texture => {
-      envTexture = pmremGenerator.fromEquirectangular(texture).texture;
-      resolve(envTexture);
+      const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+      pmremGenerator.dispose();
+      resolve(envMap);
     }, () => {}, reject);
   });
 }
@@ -84145,18 +84150,16 @@ class AugmentedStream extends _react.Component {
         initEmscriptenFunctionsAndMarkers();
       }
 
-      calculateCameraScale();
-
-      if (!envTexture) {
-        await loadEnvironmentTexture();
+      if (!envMap) {
+        envMap = await loadEnvironmentTexture();
       }
 
-      pmremGenerator.dispose(); // If model has animations create animation mixer to play them
+      calculateCameraScale(); // If model has animations create animation mixer to play them
 
       animationMixer = new THREE.AnimationMixer(gltfModel.scene);
       gltfModel.animations.forEach(clip => animationMixer.clipAction(clip).play());
       modelScene = new _Scene.default(this.props.choosedModelConfig);
-      modelScene.init(gltfModel, envTexture);
+      modelScene.init(gltfModel, envMap);
     });
 
     _defineProperty(this, "capture", () => {
@@ -84698,7 +84701,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49817" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53152" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

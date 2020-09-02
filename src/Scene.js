@@ -6,12 +6,12 @@ class Scene {
   }
 
   init(gltf, envMap) {
-    let m = this.modelConfig;
+    let config = this.modelConfig;
     const model = gltf.scene;
-    this.object = model;
-    model.scale.set(m.scale, m.scale, m.scale);
-    model.rotation.set(m.rotation[0], m.rotation[1], m.rotation[2]);
-    model.position.set(m.position[0], m.position[1], m.position[2]);
+    this.model = model;
+    model.scale.set(config.scale, config.scale, config.scale);
+    model.rotation.set(config.rotation[0], config.rotation[1], config.rotation[2]);
+    model.position.set(config.position[0], config.position[1], config.position[2]);
 
     model.traverse( function ( node ) {
         if (envMap && node.material && ( node.material.isMeshStandardMaterial ||
@@ -21,6 +21,10 @@ class Scene {
         }
     });
 
+    model.traverse( function ( node ) {
+      if ( node.isMesh || node.isLight ) node.castShadow = true;
+    } );
+
     const modelScene = new THREE.Scene();
     modelScene.add(model);
     this.addLights(modelScene);
@@ -29,8 +33,8 @@ class Scene {
   }
 
   dispose() {
-    if (this.object) {
-      this.object.traverse(node => {
+    if (this.model) {
+      this.model.traverse(node => {
         if (node.geometry) {
           node.geometry.dispose()
         }
@@ -51,6 +55,7 @@ class Scene {
 
         if (node.material && node.material.envMap && node.material.envMap.dispose) {
           node.material.envMap.dispose();
+          node.material.envMap = undefined
         }
       });
     }
@@ -62,8 +67,8 @@ class Scene {
     }
 
     this.scene.dispose();
-    this.scene = null
-    this.object = null
+    this.scene = undefined
+    this.model = undefined
   }
 
   addLights(scene) {

@@ -21,7 +21,7 @@ var onProcess,
     cameraControls,
     cameraScale, 
     renderer, 
-    envTexture,
+    envMap,
     imageWidth, 
     imageHeight, 
     bufferSize, 
@@ -132,11 +132,12 @@ async function loadEnvironmentTexture() {
   return new Promise((resolve, reject) => {
     let rgbeLoader = new RGBELoader()
       .setDataType( THREE.UnsignedByteType )
-      .setPath( '../../textures/' )
+      .setPath( '/textures/' )
 
     rgbeLoader.load( 'venice_sunset_1k.hdr', texture => {
-      envTexture = pmremGenerator.fromEquirectangular( texture ).texture;
-      resolve(envTexture);
+      const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+      pmremGenerator.dispose();
+      resolve(envMap);
     }, () => {}, reject)
   })
 }
@@ -215,20 +216,18 @@ class AugmentedStream extends Component {
       initEmscriptenFunctionsAndMarkers();
     }
 
-    calculateCameraScale();
-
-    if (!envTexture) {
-      await loadEnvironmentTexture();
+    if (!envMap) {
+      envMap = await loadEnvironmentTexture();
     }
 
-    pmremGenerator.dispose();
+    calculateCameraScale();
 
     // If model has animations create animation mixer to play them
     animationMixer = new THREE.AnimationMixer(gltfModel.scene);
     gltfModel.animations.forEach((clip) => animationMixer.clipAction(clip).play());
 
     modelScene = new Scene(this.props.choosedModelConfig);
-    modelScene.init(gltfModel, envTexture);
+    modelScene.init(gltfModel, envMap);
   }
 
   capture = () => {
