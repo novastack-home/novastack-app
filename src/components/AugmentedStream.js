@@ -266,14 +266,13 @@ class AugmentedStream extends Component {
 
       if (isStreaming) {
         animationMixer.update(clock.getDelta());
+        requestAnimationFrame(this.capture);
       }
     }
 
     cameraControls.update();
 
     statsFPS.end();
-
-    requestAnimationFrame(this.capture);
   }
 
   handleModelLoading = (xhr) => {
