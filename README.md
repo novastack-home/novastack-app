@@ -8,6 +8,7 @@ It is build on the next stack of technologies:
 
 
 ## Versions switch
+*UPDATED*: Actual version is on a master branch, so usually not needed to change branches or checkout to commit
 
 The current active version (commit 81b888d) shows 4 models on 6 markers. It is so called 'webar_phase2_lite'.
 In order to switch to a full version with all 6 models on 6 markers one can simply checkout to the previous commit by
@@ -64,18 +65,26 @@ Textures are stored in `textures/` folder. Change first argument of `rgbeLoader.
 After all changes, you need to build with the whole code. For this purposes, we use Node.js.
 
 #### Install dependencies
-First, run in the terminal
+1. Run in the terminal to install parcel-bundler:
 ```
 npm i -g parcel-bundler
 ```
-
-To run project locally you should also install server:
+2. Install http-server to run project locally:
 ```
 npm i -g http-server
 ```
+3. Go to project folder
+```
+cd {PATH_TO_PROJECT/nemiop.github.io}
+```
+4. Install project dependencies:
+```
+npm i
+```
 
 #### Start npm
-This command will start local server and watch changes in sources and rebuild bundle:
+This command will start local server on port 8080 and watch changes in sources and rebuild bundle.
+The application will be available at http://localhost:8080
 ```
 npm start
 ```
