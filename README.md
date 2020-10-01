@@ -65,19 +65,11 @@ Textures are stored in `textures/` folder. Change first argument of `rgbeLoader.
 After all changes, you need to build with the whole code. For this purposes, we use Node.js.
 
 #### Install dependencies
-1. Run in the terminal to install parcel-bundler:
-```
-npm i -g parcel-bundler
-```
-2. Install http-server to run project locally:
-```
-npm i -g http-server
-```
-3. Go to project folder
+1. Go to project folder
 ```
 cd {PATH_TO_PROJECT/nemiop.github.io}
 ```
-4. Install project dependencies:
+2. Install project dependencies:
 ```
 npm i
 ```

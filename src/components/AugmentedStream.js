@@ -14,7 +14,7 @@ import ProgressBar from './ProgressBar';
 import Container from './Container';
 import Scene from '../Scene';
 
-var onProcess,
+let onProcess,
   wasmModule,
   modelScene,
   camera,
@@ -27,9 +27,8 @@ var onProcess,
   bufferSize,
   clock,
   pmremGenerator,
-  gltfLoader,
-  requestedFrameId,
-  animationMixer;
+  animationMixer,
+  requestAnimationId;
 
 // This canvas element that used for capture video frames
 const frameCaptureCanvas = document.getElementById('captureCanvas');
@@ -38,10 +37,10 @@ const canvasContext = frameCaptureCanvas.getContext('2d');
 canvasContext.imageSmoothingEnabled = false;
 canvasContext.globalCompositeOperation = 'copy';
 
-var canvasOutput = document.getElementById('canvasOutput');
-var video = document.getElementById('video');
+const canvasOutput = document.getElementById('canvasOutput');
+const video = document.getElementById('video');
 
-gltfLoader = new GLTFLoader();
+const gltfLoader = new GLTFLoader();
 
 // Configure metrics
 const statsFPS = new Stats();
@@ -266,7 +265,7 @@ class AugmentedStream extends Component {
 
       if (isStreaming) {
         animationMixer.update(clock.getDelta());
-        requestAnimationFrame(this.capture);
+        requestAnimationId = requestAnimationFrame(this.capture);
       }
     }
 
@@ -278,7 +277,7 @@ class AugmentedStream extends Component {
   handleModelLoading = (xhr) => {
     const newState = { isModelLoading: true };
     if (xhr.lengthComputable) {
-      var percentComplete = (xhr.loaded / xhr.total) * 100;
+      const percentComplete = (xhr.loaded / xhr.total) * 100;
       newState.modelLoadingProgress = Math.round(percentComplete);
     }
     this.setState(newState);
@@ -299,15 +298,17 @@ class AugmentedStream extends Component {
     this.setState(
       (state) => Object.assign(state, { isStreaming: false }),
       () => {
-        cancelAnimationFrame(requestedFrameId);
+        cancelAnimationFrame(requestAnimationId);
+        renderer.dispose();
         renderer.clear();
         modelScene.dispose();
         this.props.onDispose();
         renderer.renderLists.dispose();
-        renderer.dispose();
         modelScene = null;
         cameraParameters = [];
         canvasContext.clearRect(0, 0, frameCaptureCanvas.width, frameCaptureCanvas.height);
+
+        animationMixer = null;
       },
     );
   }
