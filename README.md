@@ -1,5 +1,5 @@
-# Webar Phase 3
-This is complete WebAR Phase3 demo.
+# Webar Phase 4
+This is complete WebAR Phase4 demo.
 It is build on the next stack of technologies:
 * Javascript
 * ThreeJS for rendering 3D models
@@ -8,6 +8,7 @@ It is build on the next stack of technologies:
 
 
 ## Versions switch
+*UPDATED*: Actual version is on a master branch, so usually not needed to change branches or checkout to commit
 
 The current active version (commit 81b888d) shows 4 models on 6 markers. It is so called 'webar_phase2_lite'.
 In order to switch to a full version with all 6 models on 6 markers one can simply checkout to the previous commit by
@@ -21,8 +22,6 @@ or manually edit JS code as it is described below.
 To speed up loading and parsing of JS code, it is better to use only a single file with all javascript. This file is `bundle.js`. To simplify editing of JS, we separated full code into parts: 
 
 `src/components/AugmentedStream.js` contains main logic: gets video stream from devices, loads of markers, works with WASM functions to process frames and shows models over the frame.
-
-`src/scenes` folder consists a few files to load or create ThreeJS scenes.
 
 
 If you want to change something in code, you should edit any of these 3 files, we do not recommend to change `dist/index.js` directly. This file should be built by modules bundler using instructions below in the section `Save changes and build bundle`.
@@ -59,25 +58,33 @@ To add a new marker you need to modify `index.html` and `index.js` files:
 
 ### Change environment texture
 To change texture that will be used as environment map you need to modify `loadEnvironmentTexture` function at `src/components/AugmentedStream.js`.
-Textures are stored in `textures/equirectangular` folder. Change first argument of `rgbeLoader.load` to load another texture.
+Textures are stored in `textures/` folder. Change first argument of `rgbeLoader.load` to load another texture.
 
 
 ### Save changes and build bundle
 After all changes, you need to build with the whole code. For this purposes, we use Node.js.
 
 #### Install dependencies
-First, run in the terminal
+1. Run in the terminal to install parcel-bundler:
 ```
 npm i -g parcel-bundler
 ```
-
-To run project locally you should also install server:
+2. Install http-server to run project locally:
 ```
 npm i -g http-server
 ```
+3. Go to project folder
+```
+cd {PATH_TO_PROJECT/nemiop.github.io}
+```
+4. Install project dependencies:
+```
+npm i
+```
 
 #### Start npm
-This command will start local server and watch changes in sources and rebuild bundle:
+This command will start local server on port 8080 and watch changes in sources and rebuild bundle.
+The application will be available at http://localhost:8080
 ```
 npm start
 ```
@@ -85,4 +92,11 @@ npm start
 This command will only rebuild bundle:
 ```
 npm run build
+```
+
+
+#### Code style
+Run code linter to check for code style issues
+```
+npm run lint
 ```
