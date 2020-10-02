@@ -1,5 +1,5 @@
-# Webar Phase 4
-This is complete WebAR Phase4 demo.
+# Webar Phase 3
+This is complete WebAR Phase3 demo.
 It is build on the next stack of technologies:
 * Javascript
 * ThreeJS for rendering 3D models

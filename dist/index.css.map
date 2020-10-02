@@ -1,1 +1,0 @@
-{"version":3,"sources":["components/DeviceMenu/index.css"],"names":[],"mappings":"AAAA;AACA;AACA;AACA;AACA;AACA","file":"index.css","sourceRoot":"../src","sourcesContent":[".device-button {\n    height: 95px;\n    width: 235px;\n    background-color: #342060;\n}\n"]}
