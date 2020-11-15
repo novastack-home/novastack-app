@@ -639,7 +639,7 @@ class AugmentedStream extends Component {
                             </Typography>
                             <Button
                                 onClick={
-                                    isStreaming
+                                    this.state.isStreaming
                                         ? this.explore
                                         : this.scanOrPause
                                 }

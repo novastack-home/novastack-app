@@ -324,7 +324,7 @@ checkPropTypes.resetWarningCache = function () {
 
 module.exports = checkPropTypes;
 },{"./lib/ReactPropTypesSecret":"../node_modules/prop-types/lib/ReactPropTypesSecret.js"}],"../node_modules/react/cjs/react.development.js":[function(require,module,exports) {
-/** @license React v16.14.0
+/** @license React v16.13.1
  * react.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -342,7 +342,7 @@ if ("development" !== "production") {
 
     var checkPropTypes = require('prop-types/checkPropTypes');
 
-    var ReactVersion = '16.14.0'; // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+    var ReactVersion = '16.13.1'; // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
     // nor polyfill, then a plain number is used for performance.
 
     var hasSymbol = typeof Symbol === 'function' && Symbol.for;
@@ -3428,7 +3428,7 @@ if ("development" === 'production') {
   module.exports = require('./cjs/scheduler-tracing.development.js');
 }
 },{"./cjs/scheduler-tracing.development.js":"../node_modules/scheduler/cjs/scheduler-tracing.development.js"}],"../node_modules/react-dom/cjs/react-dom.development.js":[function(require,module,exports) {
-/** @license React v16.14.0
+/** @license React v16.13.1
  * react-dom.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -28166,7 +28166,7 @@ if ("development" !== "production") {
       };
     }
 
-    var ReactVersion = '16.14.0';
+    var ReactVersion = '16.13.1';
     setAttemptUserBlockingHydration(attemptUserBlockingHydration$1);
     setAttemptContinuousHydration(attemptContinuousHydration$1);
     setAttemptHydrationAtCurrentPriority(attemptHydrationAtCurrentPriority$1);
@@ -30894,9 +30894,7 @@ var RuleList = /*#__PURE__*/function () {
       Renderer: Renderer,
       generateId: generateId,
       scoped: scoped,
-      name: name,
-      keyframes: this.keyframes,
-      selector: undefined
+      name: name
     }, ruleOptions); // When user uses .createStyleSheet(), duplicate names are not possible, but
     // `sheet.addRule()` opens the door for any duplicate rule name. When this happens
     // we need to make the key unique within this RuleList instance scope.
@@ -32024,7 +32022,7 @@ var instanceCounter = 0;
 var Jss = /*#__PURE__*/function () {
   function Jss(options) {
     this.id = instanceCounter++;
-    this.version = "10.4.0";
+    this.version = "10.3.0";
     this.plugins = new PluginsRegistry();
     this.options = {
       id: {
@@ -32136,10 +32134,8 @@ var Jss = /*#__PURE__*/function () {
 
 
     if (typeof name === 'object') {
-      // $FlowIgnore
       return this.createRule(undefined, name, style);
-    } // $FlowIgnore
-
+    }
 
     var ruleOptions = (0, _extends2.default)({}, options, {
       name: name,
@@ -85042,24 +85038,40 @@ var _react = _interopRequireDefault(require("react"));
 
 var _Container = _interopRequireDefault(require("./Container"));
 
+var _styles = require("@material-ui/core/styles");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const styles = () => ({
+  icon: {
+    maxWidth: "300px",
+    maxHeight: "300px",
+    display: "block",
+    margin: "0 auto",
+    marginBottom: "16px"
+  },
+  message: {
+    textAlign: "center",
+    color: "#ffffff"
+  }
+});
+
 function Screensaver(props) {
-  return /*#__PURE__*/_react.default.createElement(_Container.default, null, /*#__PURE__*/_react.default.createElement("div", {
-    className: "screensaver"
-  }, /*#__PURE__*/_react.default.createElement("p", {
-    className: "app-title"
-  }, "Novastack App"), /*#__PURE__*/_react.default.createElement("img", {
-    className: "screensaver-icon",
+  const {
+    classes
+  } = props;
+  return /*#__PURE__*/_react.default.createElement(_Container.default, null, /*#__PURE__*/_react.default.createElement("img", {
+    className: classes.icon,
     src: props.icon
-  }), /*#__PURE__*/_react.default.createElement("div", {
-    className: "screensaver-message"
-  }, props.message)));
+  }), /*#__PURE__*/_react.default.createElement("p", {
+    className: classes.message
+  }, props.message));
 }
 
-var _default = Screensaver;
+var _default = (0, _styles.withStyles)(styles)(Screensaver);
+
 exports.default = _default;
-},{"react":"../node_modules/react/index.js","./Container":"components/Container.js"}],"components/DeviceMenu.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","./Container":"components/Container.js","@material-ui/core/styles":"../node_modules/@material-ui/core/esm/styles/index.js"}],"components/DeviceMenu.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -85597,7 +85609,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54339" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55034" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

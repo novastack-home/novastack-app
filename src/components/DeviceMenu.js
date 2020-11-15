@@ -22,6 +22,7 @@ const styles = () => ({
         color: "#ffffff",
         height: "95px",
         width: "235px",
+        marginBottom: "8px",
     },
     icon: {
         marginRight: "16px",
