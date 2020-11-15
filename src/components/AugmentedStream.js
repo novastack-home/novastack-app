@@ -645,7 +645,7 @@ class AugmentedStream extends Component {
                                 }
                                 className={classes.primaryButton}
                             >
-                                {this.state.isStreaming ? Explore : Scan}
+                                {this.state.isStreaming ? "Explore" : "Scan"}
                             </Button>
                         </div>
                     </React.Fragment>

@@ -85016,9 +85016,9 @@ class AugmentedStream extends _react.Component {
     }, /*#__PURE__*/_react.default.createElement(_Typography.default, {
       variant: "body1"
     }, "Place your phone over this image and press scan"), /*#__PURE__*/_react.default.createElement(_Button.default, {
-      onClick: isStreaming ? this.explore : this.scanOrPause,
+      onClick: this.state.isStreaming ? this.explore : this.scanOrPause,
       className: classes.primaryButton
-    }, this.state.isStreaming ? Explore : Scan))));
+    }, this.state.isStreaming ? "Explore" : "Scan"))));
   }
 
 }
@@ -85112,7 +85112,8 @@ const styles = () => ({
     backgroundColor: "#342060",
     color: "#ffffff",
     height: "95px",
-    width: "235px"
+    width: "235px",
+    marginBottom: "8px"
   },
   icon: {
     marginRight: "16px"
@@ -85609,7 +85610,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55034" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55683" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
