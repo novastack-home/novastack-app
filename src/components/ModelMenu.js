@@ -10,10 +10,10 @@ const styles = () => ({
     },
     list: {
         display: "flex",
-        overflow: "hidden",
         height: "100%",
         alignItems: "flex-end",
         margin: "0px auto",
+        flexWrap: "nowrap",
     },
     listInner: {
         display: "flex",
@@ -40,6 +40,7 @@ const styles = () => ({
     innerContainer: {
         position: "absolute",
         top: "36px",
+        left: "16px",
         height: "294px",
         marginRight: "24px",
         boxShadow:
@@ -63,6 +64,26 @@ const styles = () => ({
     },
     description: {
         marginTop: "8px",
+    },
+    modelsTitle: {
+        marginBottom: "8px",
+        marginLeft: "4px",
+        color: "#595959",
+    },
+    modelsTitleContainer: {
+        display: "flex",
+        width: "100%",
+        textAlign: "left",
+    },
+    outer: {
+        width: "100%",
+        overflowX: "scroll",
+        overflowY: "hidden",
+        position: "relative",
+    },
+    inner: {
+        width: "1000px",
+        height: "200px",
     },
 });
 
@@ -96,6 +117,17 @@ class ModelMenu extends Component {
                             src="icons/placeholder.svg"
                         />
                     </div>
+                </div>
+                <div className={classes.modelsTitleContainer}>
+                    <p className={classes.modelsTitle}>Reale - state 1</p>
+                </div>
+                <div className={classes.outer}>
+                    <div className={classes.listInner}>{modelsList}</div>
+                </div>
+                <div className={classes.modelsTitleContainer}>
+                    <p className={classes.modelsTitle}>Reale - state 2</p>
+                </div>
+                <div className={classes.outer}>
                     <div className={classes.listInner}>{modelsList}</div>
                 </div>
             </Container>

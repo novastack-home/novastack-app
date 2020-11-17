@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
+import ButtonBase from "@material-ui/core/ButtonBase";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import * as THREE from "three";
@@ -53,12 +53,14 @@ const styles = () => ({
     },
     bottomToolbar: {
         position: "fixed",
+        width: "100%",
         bottom: 0,
         height: "141px",
         padding: "16px",
         backgroundColor: "#ffffff",
         display: "flex",
         alignItems: "center",
+        justifyContent: "space-between",
     },
     toolbarTitle: {
         color: "#5B15FF",
@@ -66,7 +68,8 @@ const styles = () => ({
     primaryButton: {
         color: "#ffffff",
         backgroundColor: "#5B15FF",
-        marginLeft: "48px",
+        height: "48px",
+        width: "88px",
     },
     scanIcon: {
         position: "fixed",
@@ -74,6 +77,9 @@ const styles = () => ({
         width: "180px",
         top: "calc(50% - 72px)",
         left: "calc(50% - 90px)",
+    },
+    instructionText: {
+        width: "148px",
     },
 });
 
@@ -614,19 +620,6 @@ class AugmentedStream extends Component {
                                 >
                                     Novastack App
                                 </Typography>
-                                {/* <Button onClick={this.dispose} color="inherit">
-                                    Dispose
-                                </Button>
-                                <Button
-                                    onClick={this.explore}
-                                    color={
-                                        this.state.isExploring
-                                            ? "secondary"
-                                            : "inherit"
-                                    }
-                                >
-                                    Explore
-                                </Button> */}
                             </Toolbar>
                         </AppBar>
                         <img
@@ -634,10 +627,13 @@ class AugmentedStream extends Component {
                             src="icons/scan.svg"
                         />
                         <div className={classes.bottomToolbar}>
-                            <Typography variant="body1">
+                            <Typography
+                                className={classes.instructionText}
+                                variant="body1"
+                            >
                                 Place your phone over this image and press scan
                             </Typography>
-                            <Button
+                            <ButtonBase
                                 onClick={
                                     this.state.isStreaming
                                         ? this.explore
@@ -646,7 +642,7 @@ class AugmentedStream extends Component {
                                 className={classes.primaryButton}
                             >
                                 {this.state.isStreaming ? "Explore" : "Scan"}
-                            </Button>
+                            </ButtonBase>
                         </div>
                     </React.Fragment>
                 )}
