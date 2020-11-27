@@ -1,31 +1,16 @@
-import React from "react";
-import Container from "./Container";
-
-import { withStyles } from "@material-ui/core/styles";
-
-const styles = () => ({
-    icon: {
-        maxWidth: "300px",
-        maxHeight: "300px",
-        display: "block",
-        margin: "0 auto",
-        marginBottom: "16px",
-    },
-
-    message: {
-        textAlign: "center",
-        color: "#ffffff",
-    },
-});
+import React from 'react';
+import Container from './Container';
 
 function Screensaver(props) {
-    const { classes } = props;
-    return (
-        <Container>
-            <img className={classes.icon} src={props.icon} />
-            <p className={classes.message}>{props.message}</p>
-        </Container>
-    );
+  return (
+    <Container>
+      <div className="screensaver">
+        <p className="app-title">Novastack App</p>
+        <img className="screensaver-icon" src={props.icon} />
+        <div className="screensaver-message">{props.message}</div>
+      </div>
+    </Container>
+  );
 }
 
-export default withStyles(styles)(Screensaver);
+export default Screensaver;
