@@ -18,7 +18,7 @@ const boomBoxBoy = {
 };
 
 const modelsConfig = [
-  { id: 0, name: 'Model 1', path: 'models/m1/scene.gltf', position: [-0.5, -1.0, 0.0], rotation: [0.0, 0.0, 0.0], scale: 0.2 },
+  { id: 0, name: 'Model 1', path: 'models/m1/scene.gltf', position: [0.6, -1.0, 0.0], rotation: [0.0, 0.0, 0.0], scale: 0.2 },
   { id: 1, name: 'Model 2', path: 'models/m2/scene.gltf', position: [0.0, -1.0, 0.0], rotation: [0.0, 0.0, 0.0], scale: 0.002 },
   { id: 2, name: 'Model 3', path: 'models/m3/scene.gltf', position: [-0.2, -1.0, 0.0], rotation: [0.0, 0.0, 2.0], scale: 0.3 },
   boomBoxBoy,
