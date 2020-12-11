@@ -5,41 +5,41 @@
     "epsTrack" : 0.029999999329447746,
     "templateSize" : 75.0,
     "marker_id" : 139,
-    "marker_name" : "Marker 139.png"
+    "marker_name" : "M1.png"
   }, {
     "heightFrameLK" : 240.0,
     "maxTrackedPoints" : 15.0,
     "epsTrack" : 0.019999999552965164,
     "templateSize" : 75.0,
     "marker_id" : 142,
-    "marker_name" : "Marker 142.png"
+    "marker_name" : "M2.png"
   }, {
     "heightFrameLK" : 240.0,
     "maxTrackedPoints" : 15.0,
     "epsTrack" : 0.019999999552965164,
     "templateSize" : 75.0,
     "marker_id" : 137,
-    "marker_name" : "Marker 137.png"
+    "marker_name" : "M3.png"
   }, {
     "heightFrameLK" : 240.0,
     "maxTrackedPoints" : 15.0,
     "epsTrack" : 0.029999999329447746,
     "templateSize" : 75.0,
     "marker_id" : 138,
-    "marker_name" : "Marker 138.png"
+    "marker_name" : "M4.png"
   }, {
     "heightFrameLK" : 240.0,
     "maxTrackedPoints" : 15.0,
     "epsTrack" : 0.019999999552965164,
     "templateSize" : 75.0,
     "marker_id" : 140,
-    "marker_name" : "Marker 140.png"
+    "marker_name" : "M5.png"
   }, {
     "heightFrameLK" : 240.0,
     "maxTrackedPoints" : 15.0,
     "epsTrack" : 0.029999999329447746,
     "templateSize" : 75.0,
     "marker_id" : 141,
-    "marker_name" : "Marker 141.png"
+    "marker_name" : "M6.png"
   } ]
 }
