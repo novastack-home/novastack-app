@@ -25,10 +25,10 @@ body {
 }
 
 #canvasOutput{
- position: absolute;
+ display: flex;
  top: 0;
  left: 0;
- z-index: 10;
+ z-index: 1;
  width: 100vw;
  height: 100vh;
  /* border: 2px solid blue; */
@@ -38,8 +38,8 @@ body {
   display: flex;
   padding: 0;
   margin: 0;
-  
-  z-index: 99;
+  /* position: relative; */
+  z-index: 2;
   background: #5B15FF;
 }
 
@@ -52,7 +52,7 @@ video {
 }
 
 .loading-progress-overlay {
-  position: fixed;
+  display: flex;
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -61,7 +61,7 @@ video {
   align-items: center;
   background: rgba(25,118,210,.6);
   color: #fff;
-  z-index: 99;
+  z-index: 3;
 }
 
 .options-list {
