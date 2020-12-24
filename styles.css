@@ -16,7 +16,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 15px;
+  padding: 5rem;
   max-width: 600px;
   margin: auto;
   overflow-y: auto;
