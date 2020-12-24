@@ -25,26 +25,25 @@ body {
 }
 
 #canvasOutput{
- display: flex;
+ position: absolute;
  top: 0;
  left: 0;
- z-index: 1;
+ z-index: 10;
  width: 100vw;
  height: 100vh;
  /* border: 2px solid blue; */
 }
 
 #app {
-  display: flex;
   padding: 0;
   margin: 0;
-  /* position: relative; */
-  z-index: 2;
+  position: relative;
+  z-index: 99;
   background: #5B15FF;
 }
 
 video {
- display: flex;
+ position: absolute;
  padding: 0;
  margin: 0;
  width: 100vw;
@@ -52,7 +51,7 @@ video {
 }
 
 .loading-progress-overlay {
-  display: flex;
+  position: fixed;
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -61,7 +60,7 @@ video {
   align-items: center;
   background: rgba(25,118,210,.6);
   color: #fff;
-  z-index: 3;
+  z-index: 99;
 }
 
 .options-list {
@@ -69,14 +68,15 @@ video {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  color: #fff; 
-}
+  }
 
 .options-list button {
   margin-bottom: 10px;
-  height: 3rem;
+  height: 4rem;
   background-color: #5B15FF;
   border-color: #fff;
+  color: #fff; 
+  border-radius: 0px;
 }
 
 .screensaver-icon {
