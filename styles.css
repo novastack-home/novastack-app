@@ -17,10 +17,10 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 15px;
+  padding: 5rem;
   max-width: 600px;
   margin: auto;
-  overflow-y: auto;
+  overflow-y: hidden;
   /* background-color: #29194C; */
 }
 
@@ -43,7 +43,7 @@ body {
 }
 
 video {
- position: absolute;
+ position: relative;
  padding: 0;
  margin: 0;
  width: 100vw;
