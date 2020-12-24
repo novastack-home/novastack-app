@@ -6,6 +6,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: 'Roboto', sans-serif;
+  background-color: #1E1339;
 }
 
 .container {
@@ -34,7 +35,7 @@ body {
 #app {
   position: relative;
   z-index: 99;
-  background: #fff;
+  background: #5B15FF;
 }
 
 video {
@@ -79,11 +80,13 @@ video {
 
 .screensaver-message {
   text-align: center;
+  color: #fff;
 }
 
 .app-title {
   text-align: center;
   font-size: 2rem;
+  color: #fff;
 }
 
 #captureCanvas {
