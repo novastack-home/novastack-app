@@ -9,7 +9,7 @@ const boomBoxBoy = {
   path: 'models/m4/scene.gltf',
   position: [0.0, -0.7, 0.0],
   rotation: [0.0, 0.5, 0.0],
-  scale: 0.8,
+  scale: 0.85,
   objectClickHandlers: {
     'Cloud': () => {
       window.location.href = 'https://google.com';
